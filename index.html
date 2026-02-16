@@ -3,84 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.Care HR System (Rank: High=Big)</title>
-    
+    <title>1.Care HR System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
     <style>
-        /* တစ်မျက်နှာလုံးအတွက် Font သတ်မှတ်ချက် */
         body { font-family: 'Noto Sans Myanmar', sans-serif; background-color: #F1F5F9; }
-        
-        /* Scrollbar အလှဆင်ခြင်း */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         
-        /* --- Org Chart (သစ်ပင်ပုံစံ) CSS များ --- */
-        .tree-container { 
-            transform-origin: top center; transition: transform 0.3s ease; 
-            display: flex; justify-content: center; padding-bottom: 100px;
-        }
-        .tree ul { 
-            padding-top: 20px; position: relative; transition: all 0.5s; display: flex; justify-content: center; 
-        }
-        .tree li { 
-            float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; 
-        }
-        /* လိုင်းဆက်များ ဆွဲခြင်း */
-        .tree li::before, .tree li::after { 
-            content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #64748b; width: 50%; height: 20px; 
-        }
-        .tree li::after { 
-            right: auto; left: 50%; border-left: 1px solid #64748b; 
-        }
+        /* Tree Structure CSS */
+        .tree-container { display: flex; justify-content: center; padding-bottom: 50px; }
+        .tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
+        .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; }
+        .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #94a3b8; width: 50%; height: 20px; }
+        .tree li::after { right: auto; left: 50%; border-left: 1px solid #94a3b8; }
         .tree li:only-child::after, .tree li:only-child::before { display: none; }
         .tree li:only-child { padding-top: 0; }
         .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
-        .tree li:last-child::before { border-right: 1px solid #64748b; border-radius: 0 5px 0 0; }
+        .tree li:last-child::before { border-right: 1px solid #94a3b8; border-radius: 0 5px 0 0; }
         .tree li:first-child::after { border-radius: 5px 0 0 0; }
-        .tree ul ul::before { 
-            content: ''; position: absolute; top: 0; left: 50%; border-left: 1px solid #64748b; width: 0; height: 20px; 
-        }
+        .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 1px solid #94a3b8; width: 0; height: 20px; }
         
-        /* Node (လူတစ်ယောက်ချင်းစီ၏ ကဒ်) ဒီဇိုင်း */
         .tree-node {
-            border: 1px solid #cbd5e1; padding: 10px; text-decoration: none; color: #333; 
-            font-size: 12px; display: inline-block; border-radius: 8px; background: white; 
-            transition: all 0.3s; min-width: 150px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            position: relative; z-index: 1;
+            padding: 10px; border-radius: 8px; background: white; border: 1px solid #cbd5e1;
+            display: inline-block; min-width: 140px; position: relative; z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;
         }
-        .tree-node:hover { 
-            transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); 
-            z-index: 50; border-color: #3b82f6; 
-        }
+        .tree-node:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-color: #3b82f6; }
         
-        /* Rank အလိုက် အရောင်ခွဲခြားခြင်း */
-        .tree-node.company { background: #1e293b; color: white; border: none; font-size: 14px; font-weight: bold; }
-        .tree-node.dept { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: bold; }
-        
-        /* Rank များလေ အရောင်ပိုတောက်လေ */
-        .rank-high { background: #eff6ff; border-left: 4px solid #3b82f6; } /* Rank 8-10 (Manager) */
-        .rank-med { background: #f5f3ff; border-left: 4px solid #8b5cf6; }  /* Rank 5-7 (Supervisor) */
-        .rank-low { border-left: 4px solid #cbd5e1; }                        /* Rank 1-4 (Staff) */
-        
-        /* Hover လုပ်ရင်ပေါ်လာမည့် ခလုတ်များ */
-        .node-actions {
-            display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
-            background: #334155; padding: 4px; border-radius: 6px; gap: 4px; z-index: 100; margin-top: 5px;
-            white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-        .node-actions::before {
-            content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
-            border-width: 0 4px 4px 4px; border-color: transparent transparent #334155 transparent;
-        }
-        .tree-node:hover .node-actions { display: flex; }
-        
-        /* Loading ပြနေချိန် နောက်ခံဝါးရန် */
+        /* Rank Colors */
+        .rank-high { background: #eff6ff; border-left: 4px solid #3b82f6; } /* Manager */
+        .rank-med { background: #faf5ff; border-left: 4px solid #a855f7; } /* Supervisor */
+        .rank-low { border-left: 4px solid #cbd5e1; } /* Staff */
+
+        /* Login Overlay Blur */
         #login-overlay { backdrop-filter: blur(5px); }
     </style>
 </head>
@@ -91,15 +49,15 @@
             <div class="text-center mb-6">
                 <div class="bg-blue-600 text-white w-14 h-14 rounded-xl flex items-center justify-center text-3xl font-bold mx-auto mb-3 shadow-lg">HR</div>
                 <h2 class="text-2xl font-bold text-slate-800">System Login</h2>
-                <p class="text-slate-500 text-sm">Rank System: High Num = High Position</p>
+                <p class="text-slate-500 text-sm">1.Care Employee Database</p>
             </div>
             <form onsubmit="auth.login(event)" class="space-y-4">
-                <input type="text" id="login-user" class="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin or guest">
-                <input type="password" id="login-pass" class="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="1234">
+                <input type="text" id="login-user" class="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="Username (admin / guest)">
+                <input type="password" id="login-pass" class="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="Password (1234)">
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-transform active:scale-95">Login</button>
             </form>
-            <div class="mt-6 text-center text-xs text-slate-400 bg-slate-50 p-3 rounded-lg">
-                <p>Admin: admin / 1234 | Viewer: guest / 1234</p>
+            <div class="mt-4 text-center text-xs text-slate-400 bg-slate-50 p-2 rounded">
+                User: <b>admin</b> or <b>guest</b> | Pass: <b>1234</b>
             </div>
         </div>
     </div>
@@ -135,6 +93,10 @@
                 <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Departments</h2>
             </div>
             <nav class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1" id="dept-sidebar"></nav>
+            <div class="p-4 border-t bg-slate-50 text-center">
+                <p class="text-xs text-slate-500">Total Employees</p>
+                <p class="text-2xl font-bold text-slate-800" id="total-count">0</p>
+            </div>
         </aside>
 
         <main class="flex-1 flex flex-col relative bg-[#F8FAFC]">
@@ -143,17 +105,18 @@
                 <div class="p-6 overflow-y-auto custom-scroll">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-slate-800" id="list-title">All Employees</h2>
-                        <input type="text" id="search-input" placeholder="Search name, ID..." class="border border-slate-300 rounded-lg px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 w-64">
+                        <input type="text" id="search-input" placeholder="Search..." class="border border-slate-300 rounded-lg px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 w-64">
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="employee-grid"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="employee-grid">
+                        </div>
                 </div>
             </div>
 
             <div id="view-chart" class="hidden flex-1 overflow-hidden bg-slate-100 relative">
                 <div class="absolute top-5 left-5 z-50 bg-white/90 p-2 rounded-lg border shadow-sm flex gap-1">
-                    <button onclick="chart.zoom(-0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-minus"></i></button>
-                    <button onclick="chart.reset()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-arrows-out"></i></button>
-                    <button onclick="chart.zoom(0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-plus"></i></button>
+                    <button onclick="chart.zoom(-0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded"><i class="ph ph-minus"></i></button>
+                    <button onclick="chart.reset()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded border-x"><i class="ph ph-arrows-out"></i></button>
+                    <button onclick="chart.zoom(0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded"><i class="ph ph-plus"></i></button>
                 </div>
                 <div class="w-full h-full overflow-auto custom-scroll flex items-start justify-center pt-20" id="chart-viewport">
                     <div class="tree-container tree" id="org-tree-root"></div>
@@ -170,26 +133,23 @@
             </div>
             <form onsubmit="app.saveEmployee(event)" class="p-6 space-y-4 overflow-y-auto custom-scroll flex-1">
                 <input type="hidden" id="inp-id">
-                
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">ID</label>
-                        <input type="number" id="inp-real-id" required class="w-full border p-2 rounded bg-slate-50 outline-none">
-                    </div>
-                    <div class="col-span-2">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Company</label>
                         <select id="inp-company" class="w-full border p-2 rounded outline-none bg-white">
                             <option>1.Care</option>
                             <option>Care+</option>
                         </select>
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Rank (1-10)</label>
+                        <input type="number" id="inp-rank" min="1" max="10" class="w-full border p-2 rounded outline-none" placeholder="10=High">
+                    </div>
                 </div>
-                
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Name</label>
-                    <input type="text" id="inp-name" required class="w-full border p-2 rounded outline-none font-medium">
+                    <input type="text" id="inp-name" required class="w-full border p-2 rounded outline-none">
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Department</label>
@@ -201,63 +161,52 @@
                         <input type="text" id="inp-branch" required class="w-full border p-2 rounded outline-none">
                     </div>
                 </div>
-                
-                <div class="p-3 bg-yellow-50 rounded border border-yellow-200">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-xs font-bold text-yellow-800 uppercase">Rank (Level)</label>
-                        <span class="text-[10px] bg-yellow-200 text-yellow-800 px-1.5 rounded">High Num = Big Role</span>
-                    </div>
-                    <input type="number" id="inp-rank" required min="1" max="20" class="w-full border p-2 rounded outline-none bg-white" placeholder="e.g. 10 for Manager, 1 for Staff">
-                    <p class="text-[10px] text-slate-500 mt-1">10 = Manager/Head, 1 = Junior Staff</p>
-                </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Position</label>
                     <input type="text" id="inp-pos" required class="w-full border p-2 rounded outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">JD (Job Description)</label>
-                    <textarea id="inp-jd" rows="3" class="w-full border p-2 rounded outline-none text-sm"></textarea>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Job Description</label>
+                    <textarea id="inp-jd" rows="4" class="w-full border p-2 rounded outline-none text-sm"></textarea>
                 </div>
             </form>
             <div class="p-4 border-t bg-slate-50 flex justify-end gap-3 rounded-b-xl">
-                <button onclick="app.closeModal('emp-modal')" class="px-5 py-2 text-slate-600 hover:bg-slate-200 rounded font-medium">Cancel</button>
-                <button onclick="document.querySelector('#emp-modal form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold shadow-md">Save</button>
+                <button onclick="app.closeModal('emp-modal')" class="px-5 py-2 text-slate-600 font-medium">Cancel</button>
+                <button onclick="document.querySelector('#emp-modal form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))" class="px-6 py-2 bg-blue-600 text-white rounded font-bold shadow-md">Save</button>
             </div>
         </div>
     </div>
 
-    <div id="jd-view-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[200] backdrop-blur-sm p-4 transition-opacity duration-300">
+    <div id="jd-view-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[200] backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm" id="jd-avatar">AU</div>
                     <div>
                         <h3 class="font-bold text-2xl text-slate-800 leading-tight" id="jd-name">Name</h3>
                         <p class="text-blue-600 font-medium" id="jd-pos">Position</p>
-                        <div class="flex gap-2 mt-1">
-                            <span class="bg-white border border-slate-200 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400">ID: <span id="jd-id-display">1</span></span>
-                            <span class="bg-yellow-100 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold">Rank: <span id="jd-rank-display">1</span></span>
-                        </div>
+                        <div class="mt-1 bg-white border border-slate-200 px-2 py-0.5 rounded text-[10px] inline-block font-mono text-slate-400">ID: <span id="jd-id-display">1</span></div>
                     </div>
                 </div>
-                <button onclick="app.closeModal('jd-view-modal')" class="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-200 rounded-full"><i class="ph ph-x text-2xl"></i></button>
+                <button onclick="app.closeModal('jd-view-modal')" class="text-slate-400 hover:text-slate-600 p-2"><i class="ph ph-x text-2xl"></i></button>
             </div>
-            <div class="p-6 space-y-6 overflow-y-auto custom-scroll max-h-[70vh]">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+            
+            <div class="p-6 space-y-6 overflow-y-auto custom-scroll max-h-[70vh] bg-white">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Department</p>
                         <p class="font-bold text-slate-700 text-sm" id="jd-dept">-</p>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Branch</p>
                         <p class="font-bold text-slate-700 text-sm" id="jd-branch">-</p>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Company</p>
                         <p class="font-bold text-slate-700 text-sm" id="jd-company">-</p>
                     </div>
                 </div>
+
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
                         <h4 class="font-bold text-slate-800 text-lg">Job Description</h4>
@@ -272,36 +221,24 @@
     </div>
 
     <script>
-        // --- 1. DATA (အချက်အလက်များ) ---
-        // Rank 10 = Head, Rank 1 = Staff (နံပတ်ကြီးလေ ရာထူးကြီးလေ)
-        const defaultData = [
-            {"id": 1, "rank": 5, "company": "1.Care", "branch": "MDY", "position": "Sr. Service Technician", "dept": "1.Care Service", "name": "Aung Zaw Win"},
-            {"id": 2, "rank": 10, "company": "1.Care", "branch": "Head Office", "position": "Audit Manager", "dept": "Internal Audit", "name": "Saw Shwe Wa"},
-            {"id": 7, "rank": 10, "company": "1.Care", "branch": "Head Office", "position": "Operation Manager", "dept": "Head Office", "name": "Min Thura Kyaw"},
-            {"id": 18, "rank": 7, "company": "1.Care", "branch": "MDY", "position": "Sr. Service Supervisor", "dept": "1.Care Service", "name": "Saw Htay Win"},
-            {"id": 14, "rank": 1, "company": "1.Care", "branch": "MDY", "position": "Jr.Sevice Technician", "dept": "1.Care Service", "name": "Swan Min Htet"},
-            {"id": 15, "rank": 1, "company": "1.Care", "branch": "YGN", "position": "Jr.Sevice Technician", "dept": "1.Care Service", "name": "Kaung Htet Kyaw"}
-        ];
-
-        // --- 2. AUTH SYSTEM (Login/Logout) ---
+        // --- AUTH ---
         const auth = {
             currentUser: null,
             init() {
-                // Browser ထဲမှာ Login ဝင်ပြီးသားရှိမရှိ စစ်ဆေးခြင်း
                 const session = sessionStorage.getItem('user_session');
                 if (session) {
                     this.currentUser = JSON.parse(session);
                     this.applyRole();
+                    app.init();
                 } else document.getElementById('login-overlay').classList.remove('hidden');
             },
             login(e) {
                 e.preventDefault();
                 const u = document.getElementById('login-user').value.toLowerCase();
                 const p = document.getElementById('login-pass').value;
-                // Username/Password စစ်ဆေးခြင်း (Admin နှင့် Guest)
                 if ((u === 'admin' || u === 'guest') && p === '1234') {
                     this.setSession({ role: u === 'admin' ? 'admin' : 'viewer' });
-                } else alert('Invalid Login!');
+                } else alert('Login Failed');
             },
             setSession(user) {
                 this.currentUser = user;
@@ -312,101 +249,90 @@
             },
             logout() { sessionStorage.removeItem('user_session'); location.reload(); },
             applyRole() {
-                // Admin ဖြစ်မှ Add/Edit/Delete ခလုတ်တွေကို ပြပေးပါမယ်
                 const isAdmin = this.currentUser.role === 'admin';
                 document.getElementById('user-role-badge').textContent = isAdmin ? 'Admin' : 'Viewer';
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
             }
         };
 
-        // --- 3. DATABASE (Local Storage) ---
+        // --- DATA LAYER (Local for now, structure ready for API) ---
         const db = {
-            key: 'emp_db_ranked_final',
-            // Data ယူရန်
-            get() {
+            key: 'hr_data_v2',
+            getAll() {
+                // If you connect neon later, you will replace this with:
+                // const res = await fetch('/api/employees'); return res.json();
                 const data = localStorage.getItem(this.key);
-                if (!data) return defaultData; // Data မရှိရင် default သုံးမယ်
+                if(!data) {
+                    // SEED DATA if empty so you can SEE something
+                    const seed = [
+                        {id: 1, rank: 3, name: "Aung Zaw Win", position: "Sr. Service Technician", dept: "1.Care Service", branch: "MDY", company: "1.Care", jd: "Responsible for repairing mobile devices..."},
+                        {id: 2, rank: 8, name: "Saw Shwe Wa", position: "Audit Manager", dept: "Internal Audit", branch: "Head Office", company: "1.Care", jd: "Oversees internal financial audits..."},
+                        {id: 3, rank: 1, name: "Kaung Htet", position: "Jr. Technician", dept: "1.Care Service", branch: "YGN", company: "1.Care", jd: "Assists senior technicians..."}
+                    ];
+                    localStorage.setItem(this.key, JSON.stringify(seed));
+                    return seed;
+                }
                 return JSON.parse(data);
             },
-            // Data သိမ်းရန်
-            save(data) { localStorage.setItem(this.key, JSON.stringify(data)); },
-            // အသစ်ထည့်ရန်
-            add(emp) { const d = this.get(); d.push(emp); this.save(d); },
-            // ပြင်ဆင်ရန်
-            update(emp) { 
-                const d = this.get(); 
-                const idx = d.findIndex(e => e.id == emp.id);
-                if(idx !== -1) { d[idx] = emp; this.save(d); }
+            save(item) {
+                let data = this.getAll();
+                if(item.id) {
+                    const idx = data.findIndex(e => e.id == item.id);
+                    if(idx !== -1) data[idx] = item;
+                } else {
+                    item.id = Date.now();
+                    data.push(item);
+                }
+                localStorage.setItem(this.key, JSON.stringify(data));
             },
-            // ဖျက်ရန်
             delete(id) {
-                const d = this.get().filter(e => e.id != id);
-                this.save(d);
+                let data = this.getAll().filter(e => e.id != id);
+                localStorage.setItem(this.key, JSON.stringify(data));
             }
         };
 
-        // --- 4. CHART CONTROLLER (Zoom/Pan) ---
-        const chart = {
-            scale: 1,
-            zoom(delta) {
-                this.scale = Math.max(0.3, Math.min(2, this.scale + delta));
-                document.getElementById('org-tree-root').style.transform = `scale(${this.scale})`;
-            },
-            reset() {
-                this.scale = 1;
-                document.getElementById('org-tree-root').style.transform = `scale(1)`;
-            }
-        };
-
-        // --- 5. MAIN APP LOGIC ---
+        // --- APP LOGIC ---
         const app = {
             data: [],
             state: { view: 'list', dept: 'All', search: '' },
 
             init() {
-                this.data = db.get();
-                // Data အလွတ်ဖြစ်နေရင် default data ထည့်ပေးလိုက်မယ်
-                if(this.data.length === 0) { this.data = defaultData; db.save(this.data); }
-                
+                this.data = db.getAll();
                 this.renderSidebar();
                 this.renderList();
                 this.renderChart();
                 
-                // Search box မှာ စာရိုက်ရင် ရှာပေးမယ့် function
                 document.getElementById('search-input').addEventListener('input', (e) => {
                     this.state.search = e.target.value.toLowerCase();
                     this.renderList();
                 });
             },
 
-            // View ပြောင်းရန် (List <-> Chart)
             switchView(view) {
                 this.state.view = view;
                 document.getElementById('view-list').classList.toggle('hidden', view !== 'list');
                 document.getElementById('view-chart').classList.toggle('hidden', view !== 'chart');
                 
-                // ခလုတ်အရောင်ပြောင်းခြင်း
                 const btnList = document.getElementById('btn-list');
                 const btnChart = document.getElementById('btn-chart');
-                const activeClass = ['bg-white','text-indigo-600','shadow'];
-                const inactiveClass = ['text-slate-500'];
                 
                 if(view === 'list') {
-                    btnList.classList.add(...activeClass); btnList.classList.remove(...inactiveClass);
-                    btnChart.classList.remove(...activeClass); btnChart.classList.add(...inactiveClass);
+                    btnList.classList.add('bg-white','text-indigo-600','shadow'); 
+                    btnList.classList.remove('text-slate-500');
+                    btnChart.classList.remove('bg-white','text-indigo-600','shadow'); 
+                    btnChart.classList.add('text-slate-500');
                 } else {
-                    btnChart.classList.add(...activeClass); btnChart.classList.remove(...inactiveClass);
-                    btnList.classList.remove(...activeClass); btnList.classList.add(...inactiveClass);
-                    this.renderChart(); // Chart ကို refresh လုပ်ပေးမယ်
+                    btnChart.classList.add('bg-white','text-indigo-600','shadow'); 
+                    btnChart.classList.remove('text-slate-500');
+                    btnList.classList.remove('bg-white','text-indigo-600','shadow'); 
+                    btnList.classList.add('text-slate-500');
+                    this.renderChart();
                 }
             },
 
-            // --- Sidebar Render (ဘယ်ဘက် ဌာနများပြခြင်း) ---
             renderSidebar() {
                 const depts = {};
-                // ဌာနတစ်ခုစီမှာ လူဘယ်လောက်ရှိလဲ ရေတွက်ခြင်း
                 this.data.forEach(e => depts[e.dept] = (depts[e.dept] || 0) + 1);
-                
                 const sidebar = document.getElementById('dept-sidebar');
                 const datalist = document.getElementById('dept-list');
                 
@@ -414,16 +340,12 @@
                 datalist.innerHTML = '';
 
                 Object.entries(depts).sort((a,b)=>b[1]-a[1]).forEach(([d, c]) => {
-                    datalist.innerHTML += `<option value="${d}">`; // Add Modal အတွက်
-                    sidebar.innerHTML += `
-                        <button onclick="app.filterDept('${d}')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm flex justify-between ${this.state.dept===d ? 'bg-indigo-50 text-indigo-700 font-bold':'text-slate-600 hover:bg-slate-100'}">
-                            <span class="truncate pr-2">${d}</span> <span class="bg-slate-200 px-1.5 rounded text-xs py-0.5">${c}</span>
-                        </button>`;
+                    datalist.innerHTML += `<option value="${d}">`;
+                    sidebar.innerHTML += `<button onclick="app.filterDept('${d}')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm flex justify-between ${this.state.dept===d ? 'bg-indigo-50 text-indigo-700 font-bold':'text-slate-600 hover:bg-slate-100'}"><span class="truncate pr-2">${d}</span> <span class="bg-slate-200 px-1.5 rounded text-xs py-0.5">${c}</span></button>`;
                 });
-                document.getElementById('sidebar-total').innerText = this.data.length;
+                document.getElementById('total-count').innerText = this.data.length;
             },
 
-            // ဌာနရွေးလိုက်ရင် အလုပ်လုပ်မည့် function
             filterDept(d) {
                 this.state.dept = d;
                 this.renderSidebar();
@@ -431,63 +353,51 @@
                 this.renderChart();
             },
 
-            // --- List Render (လူစာရင်းပြခြင်း) ---
             renderList() {
                 const grid = document.getElementById('employee-grid');
                 grid.innerHTML = '';
-                
-                // Filter လုပ်ခြင်း (ဌာန နှင့် Search စာသား)
                 const filtered = this.data.filter(e => {
                     const matchDept = this.state.dept === 'All' || e.dept === this.state.dept;
-                    const matchSearch = e.name.toLowerCase().includes(this.state.search) || String(e.id).includes(this.state.search);
+                    const matchSearch = e.name.toLowerCase().includes(this.state.search);
                     return matchDept && matchSearch;
                 });
-                
-                document.getElementById('list-title').innerText = this.state.dept === 'All' ? 'All Employees' : this.state.dept;
+                document.getElementById('list-title').innerText = this.state.dept;
 
-                // [UPDATE] Sorting: Rank များတဲ့လူ (Big Number) ကို အရင်ပြပါမယ် (b - a)
+                // Sort: High Rank (Big Number) First
                 filtered.sort((a,b) => (b.rank || 0) - (a.rank || 0));
 
-                // ကဒ်တစ်ခုချင်းစီ တည်ဆောက်ခြင်း
                 filtered.forEach(e => {
                     const isAdmin = auth.currentUser.role === 'admin';
-                    // Rank အလိုက် ကာလာခွဲခြင်း
-                    let rankColor = 'bg-slate-100 text-slate-500 border-slate-200';
-                    if ((e.rank || 0) >= 8) rankColor = 'bg-blue-100 text-blue-700 border-blue-200'; // Manager
-                    else if ((e.rank || 0) >= 5) rankColor = 'bg-purple-100 text-purple-700 border-purple-200'; // Supervisor
-                    
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all group relative";
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs border">${e.name.substring(0,2).toUpperCase()}</div>
-                            <div class="flex gap-1">
-                                <button onclick="app.viewJD(${e.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-100">JD</button>
-                                ${isAdmin ? `
-                                    <button onclick="app.editEmployee(${e.id})" class="text-slate-400 hover:text-blue-600 p-1"><i class="ph ph-pencil-simple"></i></button>
-                                    <button onclick="app.deleteEmployee(${e.id})" class="text-slate-400 hover:text-red-600 p-1"><i class="ph ph-trash"></i></button>
-                                ` : ''}
+                    let rankClass = 'bg-slate-100 text-slate-500';
+                    if(e.rank >= 8) rankClass = 'bg-blue-100 text-blue-700';
+                    else if(e.rank >= 5) rankClass = 'bg-purple-100 text-purple-700';
+
+                    grid.innerHTML += `
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 border">${e.name.substring(0,2).toUpperCase()}</div>
+                                <div class="flex gap-1">
+                                    <button onclick="app.viewJD(${e.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-100">JD</button>
+                                    ${isAdmin ? `<button onclick="app.editEmployee(${e.id})" class="text-slate-400 hover:text-blue-600 p-1"><i class="ph ph-pencil-simple"></i></button><button onclick="app.deleteEmployee(${e.id})" class="text-slate-400 hover:text-red-600 p-1"><i class="ph ph-trash"></i></button>` : ''}
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-slate-800 truncate">${e.name}</h3>
+                            <p class="text-xs text-indigo-600 font-semibold truncate mb-2">${e.position}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded border">${e.branch}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded border font-bold ${rankClass}">Rank ${e.rank}</span>
                             </div>
                         </div>
-                        <h3 class="font-bold text-slate-800 truncate" title="${e.name}">${e.name}</h3>
-                        <p class="text-xs text-indigo-600 font-semibold truncate mb-2">${e.position}</p>
-                        <div class="flex items-center justify-between mt-2">
-                             <span class="text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">${e.branch}</span>
-                             <span class="text-[10px] px-2 py-0.5 rounded border font-bold ${rankColor}">Rank ${e.rank || '-'}</span>
-                        </div>
                     `;
-                    grid.appendChild(card);
                 });
             },
 
-            // --- Chart Render (Org Chart ဆွဲခြင်း) ---
             renderChart() {
                 const root = document.getElementById('org-tree-root');
                 root.innerHTML = '';
                 
                 let chartData = this.state.dept === 'All' ? this.data : this.data.filter(e => e.dept === this.state.dept);
                 
-                // Data ကို Company -> Dept အလိုက် အုပ်စုဖွဲ့ခြင်း
                 const tree = {};
                 chartData.forEach(e => {
                     if(!tree[e.company]) tree[e.company] = {};
@@ -502,42 +412,21 @@
                     html += `<li><div class="tree-node company shadow-lg">${comp}</div><ul>`;
                     
                     for (const [deptName, staff] of Object.entries(depts)) {
-                        // [UPDATE] Sorting: Rank ကြီးသူ အရင်လာမယ် (b - a)
-                        staff.sort((a,b) => (b.rank || 0) - (a.rank || 0));
+                        staff.sort((a,b) => (b.rank || 0) - (a.rank || 0)); // Rank High First
 
                         html += `<li><div class="tree-node dept shadow">${deptName}</div>`;
                         
-                        // [UPDATE] Hierarchy Logic: Rank ကြီးသူက ခေါင်းဆောင်၊ ငယ်သူက နောက်လိုက်
                         if (staff.length > 0) {
-                            // Rank အမြင့်ဆုံးနံပတ်ကို ရှာမယ် (ဥပမာ - 10)
-                            const highestRank = staff[0].rank || 0;
-                            
-                            // Rank တူတဲ့သူတွေ (ဥပမာ - Manager 2 ယောက်ရှိရင်)
-                            const leaders = staff.filter(s => (s.rank || 0) === highestRank);
-                            
-                            // Leaders ထက် Rank နံပတ် 'ငယ်' တဲ့သူတွေ (subordinates)
-                            // < logic ကိုသုံးထားပါတယ် (Rank 5 < Rank 10)
-                            const subordinates = staff.filter(s => (s.rank || 0) < highestRank);
+                            const leaderRank = staff[0].rank || 0;
+                            const leaders = staff.filter(s => (s.rank || 0) === leaderRank);
+                            const subordinates = staff.filter(s => (s.rank || 0) < leaderRank);
 
                             html += `<ul>`;
-                            
                             leaders.forEach(lead => {
-                                html += `<li>`;
-                                html += this.createNode(lead); // Leader Node ဆောက်မယ်
-                                
-                                // Leader အောက်မှာ ငယ်သားတွေ ထည့်မယ်
-                                // (ဒီမှာက Parent ID မသုံးဘဲ Rank နဲ့ Auto စီထားတာမို့၊ နောက်ဆုံး Leader အောက်မှာ အကုန်ထည့်လိုက်ပါမယ်)
+                                html += `<li>${this.createNode(lead)}`;
                                 if (lead === leaders[leaders.length-1] && subordinates.length > 0) {
                                      html += `<ul>`;
-                                     
-                                     // ဝန်ထမ်း အရမ်းများနေရင် Group လိုက်ပြမယ်
-                                     if(subordinates.length > 8) {
-                                         html += `<li><div class="tree-node staff">... ${subordinates.length} Staff ...</div><ul>`;
-                                         subordinates.forEach(sub => { html += `<li>${this.createNode(sub)}</li>`; });
-                                         html += `</ul></li>`;
-                                     } else {
-                                         subordinates.forEach(sub => { html += `<li>${this.createNode(sub)}</li>`; });
-                                     }
+                                     subordinates.forEach(sub => { html += `<li>${this.createNode(sub)}</li>`; });
                                      html += `</ul>`;
                                 }
                                 html += `</li>`;
@@ -552,133 +441,100 @@
                 root.innerHTML = html;
             },
 
-            // Node (Org Chart ပုံးလေးများ) ဖန်တီးပေးသည့် Function
             createNode(emp) {
-                const isAdmin = auth.currentUser.role === 'admin';
-                
-                // Rank အလိုက် Class သတ်မှတ်ခြင်း (CSS မှာ အရောင်ခွဲထားသည်)
                 let rankClass = 'rank-low';
-                if ((emp.rank || 0) >= 8) rankClass = 'rank-high'; // Manager
-                else if ((emp.rank || 0) >= 5) rankClass = 'rank-med'; // Supervisor
+                if (emp.rank >= 8) rankClass = 'rank-high';
+                else if (emp.rank >= 5) rankClass = 'rank-med';
                 
                 return `
                     <div class="tree-node ${rankClass} group">
                         <div class="font-bold truncate text-slate-700">${emp.name}</div>
-                        <div class="text-[10px] text-slate-500 truncate opacity-90">${emp.position}</div>
-                        <div class="flex justify-between items-center mt-1">
-                            <div class="text-[9px] text-slate-400">${emp.branch}</div>
-                            <div class="text-[9px] font-bold bg-white/50 px-1 rounded text-slate-600">R-${emp.rank||'?'}</div>
-                        </div>
-                        
+                        <div class="text-[10px] text-slate-500 truncate">${emp.position}</div>
                         <div class="node-actions">
-                            <button onclick="app.viewJD(${emp.id})" class="text-[10px] text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-600">JD</button>
-                            ${isAdmin ? `<button onclick="app.editEmployee(${emp.id})" class="text-[10px] text-white bg-blue-500 px-2 py-0.5 rounded hover:bg-blue-600">Edit</button>` : ''}
+                            <button onclick="app.viewJD(${emp.id})" class="text-[10px] text-white bg-indigo-500 px-2 py-0.5 rounded">JD</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             },
 
-            // --- CRUD FUNCTIONS (Data ကိုင်တွယ်ခြင်း) ---
-            
-            // Add Modal ဖွင့်ရန်
             openAddModal() {
                 document.getElementById('emp-modal').classList.remove('hidden');
                 document.getElementById('modal-title').innerText = "Add New Employee";
                 document.querySelector('#emp-modal form').reset();
-                document.getElementById('inp-real-id').disabled = false;
-                
-                // Auto ID ထုတ်ပေးခြင်း (အကြီးဆုံး ID + 1)
-                const max = this.data.length > 0 ? Math.max(...this.data.map(e=>e.id)) : 0;
-                document.getElementById('inp-real-id').value = max + 1;
-                document.getElementById('inp-rank').value = 1; // Default Rank
+                document.getElementById('inp-id').value = "";
             },
 
-            // Edit Modal ဖွင့်ရန် (ရှိပြီးသား Data ဖြည့်ပေးမယ်)
             editEmployee(id) {
                 const emp = this.data.find(e => e.id == id);
                 if(!emp) return;
                 document.getElementById('emp-modal').classList.remove('hidden');
                 document.getElementById('modal-title').innerText = "Edit Employee";
-                
-                document.getElementById('inp-real-id').value = emp.id;
-                document.getElementById('inp-real-id').disabled = true; // ID ကို ပြင်လို့မရအောင် ပိတ်ထားမယ်
+                document.getElementById('inp-id').value = emp.id;
                 document.getElementById('inp-company').value = emp.company;
                 document.getElementById('inp-name').value = emp.name;
                 document.getElementById('inp-dept').value = emp.dept;
                 document.getElementById('inp-branch').value = emp.branch;
                 document.getElementById('inp-pos').value = emp.position;
-                document.getElementById('inp-rank').value = emp.rank || 1; 
+                document.getElementById('inp-rank').value = emp.rank;
                 document.getElementById('inp-jd').value = emp.jd || "";
             },
 
-            // Data သိမ်းဆည်းခြင်း (Save)
             saveEmployee(e) {
                 e.preventDefault();
-                const id = parseInt(document.getElementById('inp-real-id').value);
-                const isEdit = document.getElementById('inp-real-id').disabled;
-
+                const idInput = document.getElementById('inp-id').value;
                 const empObj = {
-                    id: id,
+                    id: idInput ? parseInt(idInput) : null,
                     company: document.getElementById('inp-company').value,
                     name: document.getElementById('inp-name').value,
                     dept: document.getElementById('inp-dept').value,
                     branch: document.getElementById('inp-branch').value,
                     position: document.getElementById('inp-pos').value,
-                    rank: parseInt(document.getElementById('inp-rank').value) || 1, // Rank သိမ်းမယ်
+                    rank: parseInt(document.getElementById('inp-rank').value) || 1,
                     jd: document.getElementById('inp-jd').value
                 };
-
-                if (isEdit) db.update(empObj); // ပြင်တာဆို Update
-                else {
-                    // အသစ်ဆို ID တူမတူ စစ်မယ်
-                    if(this.data.some(x=>x.id==id)) { alert('ID exists'); return; }
-                    db.add(empObj);
-                }
-                
-                // Save ပြီးရင် Data ပြန်ယူပြီး ပိတ်မယ်
-                this.data = db.get();
+                db.save(empObj);
+                this.data = db.getAll();
                 this.closeModal('emp-modal');
                 this.filterDept(this.state.dept);
             },
 
-            // ဖျက်ရန်
             deleteEmployee(id) {
-                if(confirm("Delete this employee?")) {
+                if(confirm("Delete?")) {
                     db.delete(id);
-                    this.data = db.get();
+                    this.data = db.getAll();
                     this.filterDept(this.state.dept);
                 }
             },
 
-            // JD ကြည့်ရန် (Modal အကြီး)
             viewJD(id) {
                 const emp = this.data.find(e => e.id == id);
                 if(!emp) return;
-                
-                // Data တွေကို UI မှာ နေရာချမယ်
                 document.getElementById('jd-name').innerText = emp.name;
                 document.getElementById('jd-pos').innerText = emp.position;
                 document.getElementById('jd-id-display').innerText = emp.id;
-                document.getElementById('jd-rank-display').innerText = emp.rank || '-';
                 document.getElementById('jd-avatar').innerText = emp.name.substring(0,2).toUpperCase();
                 document.getElementById('jd-dept').innerText = emp.dept;
                 document.getElementById('jd-branch').innerText = emp.branch;
                 document.getElementById('jd-company').innerText = emp.company;
-                
-                const defaultJD = `No Job Description added yet.`;
-                document.getElementById('jd-content').innerText = emp.jd || defaultJD;
-                
-                // Modal ဖွင့်မယ်
-                const modal = document.getElementById('jd-view-modal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+                document.getElementById('jd-content').innerText = emp.jd || "No JD available.";
+                document.getElementById('jd-view-modal').classList.remove('hidden');
+                document.getElementById('jd-view-modal').classList.add('flex');
             },
 
-            // Modal ပိတ်ရန် Function
-            closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+            closeModal(id) { 
+                document.getElementById(id).classList.add('hidden'); 
+                document.getElementById(id).classList.remove('flex');
+            }
         };
 
-        // Browser စဖွင့်တာနဲ့ Auth စစ်မယ်
+        const chart = {
+            scale: 1,
+            zoom(delta) {
+                this.scale = Math.max(0.3, Math.min(2, this.scale + delta));
+                document.getElementById('org-tree-root').style.transform = `scale(${this.scale})`;
+            },
+            reset() { this.scale = 1; document.getElementById('org-tree-root').style.transform = `scale(1)`; }
+        };
+
         window.addEventListener('DOMContentLoaded', () => auth.init());
     </script>
 </body>

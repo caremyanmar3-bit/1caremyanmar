@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.Care & Care+ HR System (Full Data)</title>
+    <title>1.Care HR System (Neon DB)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -13,7 +13,7 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         
-        /* Advanced Tree CSS */
+        /* Tree CSS */
         .tree-container { 
             transform-origin: top center; transition: transform 0.3s ease; 
             display: flex; justify-content: center; padding-bottom: 100px;
@@ -24,13 +24,10 @@
         .tree li { 
             float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; 
         }
-        /* Connectors */
         .tree li::before, .tree li::after { 
             content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #64748b; width: 50%; height: 20px; 
         }
-        .tree li::after { 
-            right: auto; left: 50%; border-left: 1px solid #64748b; 
-        }
+        .tree li::after { right: auto; left: 50%; border-left: 1px solid #64748b; }
         .tree li:only-child::after, .tree li:only-child::before { display: none; }
         .tree li:only-child { padding-top: 0; }
         .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
@@ -46,20 +43,17 @@
             transition: all 0.3s; min-width: 150px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             position: relative; z-index: 1;
         }
-        .tree-node:hover { 
-            transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); 
-            z-index: 50; border-color: #3b82f6; 
-        }
+        .tree-node:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 50; border-color: #3b82f6; }
         
-        /* Role Specific Styles */
         .tree-node.company { background: #1e293b; color: white; border: none; font-size: 14px; font-weight: bold; }
         .tree-node.dept { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: bold; }
-        .tree-node.manager { 
-            background: #eff6ff; border-left: 4px solid #3b82f6; 
-        }
-        .tree-node.staff { border-left: 4px solid #cbd5e1; }
         
-        /* Action Buttons on Hover */
+        /* Rank Colors */
+        .rank-1 { background: #eff6ff; border-left: 4px solid #3b82f6; } 
+        .rank-2 { background: #f5f3ff; border-left: 4px solid #8b5cf6; } 
+        .rank-3 { background: #fffbeb; border-left: 4px solid #f59e0b; } 
+        .rank-4 { border-left: 4px solid #cbd5e1; }
+        
         .node-actions {
             display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
             background: #334155; padding: 4px; border-radius: 6px; gap: 4px; z-index: 100; margin-top: 5px;
@@ -70,34 +64,30 @@
             border-width: 0 4px 4px 4px; border-color: transparent transparent #334155 transparent;
         }
         .tree-node:hover .node-actions { display: flex; }
-
-        /* Login Overlay */
         #login-overlay { backdrop-filter: blur(5px); }
+        .loading-spinner { border-top-color: transparent; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[300] hidden items-center justify-center">
+        <div class="w-10 h-10 border-4 border-blue-600 border-solid rounded-full animate-spin loading-spinner"></div>
+    </div>
 
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/90 z-[100] flex items-center justify-center">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 border border-slate-200">
             <div class="text-center mb-6">
                 <div class="bg-blue-600 text-white w-14 h-14 rounded-xl flex items-center justify-center text-3xl font-bold mx-auto mb-3 shadow-lg">HR</div>
                 <h2 class="text-2xl font-bold text-slate-800">System Login</h2>
-                <p class="text-slate-500 text-sm">1.Care & Care+ Employee Database</p>
+                <p class="text-slate-500 text-sm">Neon Database Connected</p>
             </div>
             <form onsubmit="auth.login(event)" class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Username</label>
-                    <input type="text" id="login-user" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin or guest">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Password</label>
-                    <input type="password" id="login-pass" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="1234">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-transform active:scale-95">Access System</button>
+                <input type="text" id="login-user" class="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin or guest">
+                <input type="password" id="login-pass" class="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="1234">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-transform active:scale-95">Login</button>
             </form>
             <div class="mt-6 text-center text-xs text-slate-400 bg-slate-50 p-3 rounded-lg">
-                <p class="font-mono">Admin: admin / 1234</p>
-                <p class="font-mono">Viewer: guest / 1234</p>
+                <p>Admin: admin / 1234 | Viewer: guest / 1234</p>
             </div>
         </div>
     </div>
@@ -105,7 +95,7 @@
     <header class="bg-white border-b border-slate-200 h-16 flex-none z-30 shadow-sm px-6 flex items-center justify-between">
         <div class="flex items-center gap-4">
             <div class="bg-indigo-600 text-white w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold shadow-md">
-                <i class="ph ph-users-three"></i>
+                <i class="ph ph-database"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight text-slate-800">1.Care HR System</h1>
@@ -115,203 +105,158 @@
                 </div>
             </div>
         </div>
-
         <div class="flex items-center gap-3">
             <div class="bg-slate-100 p-1 rounded-lg flex gap-1 mr-4">
-                <button onclick="app.switchView('list')" id="btn-list" class="px-4 py-1.5 text-sm font-medium rounded shadow bg-white text-indigo-600 transition-all">List View</button>
-                <button onclick="app.switchView('chart')" id="btn-chart" class="px-4 py-1.5 text-sm font-medium rounded text-slate-500 hover:text-slate-700 transition-all">Org Chart</button>
+                <button onclick="app.switchView('list')" id="btn-list" class="px-4 py-1.5 text-sm font-medium rounded shadow bg-white text-indigo-600">List</button>
+                <button onclick="app.switchView('chart')" id="btn-chart" class="px-4 py-1.5 text-sm font-medium rounded text-slate-500">Chart</button>
             </div>
-
-            <button onclick="app.openAddModal()" class="admin-only hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-all">
-                <i class="ph ph-plus-circle text-lg"></i> <span class="hidden md:inline">Add Member</span>
+            <button onclick="app.openAddModal()" class="admin-only hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
+                <i class="ph ph-plus-circle text-lg"></i> <span class="hidden md:inline">Add</span>
             </button>
-            <button onclick="auth.logout()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition-colors" title="Logout">
-                <i class="ph ph-sign-out text-xl"></i>
-            </button>
+            <button onclick="auth.logout()" class="text-slate-400 hover:text-red-500 p-2 rounded-full"><i class="ph ph-sign-out text-xl"></i></button>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        
-        <aside class="w-72 bg-white border-r border-slate-200 flex flex-col hidden md:flex z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <aside class="w-72 bg-white border-r border-slate-200 flex flex-col hidden md:flex z-20">
             <div class="p-4 border-b border-slate-100 bg-slate-50/50">
                 <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Departments</h2>
             </div>
             <nav class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1" id="dept-sidebar"></nav>
-            <div class="p-4 border-t border-slate-100 bg-slate-50 text-center">
-                <p class="text-xs text-slate-500">Total Employees</p>
-                <p class="text-2xl font-bold text-slate-800" id="sidebar-total">0</p>
-            </div>
         </aside>
 
         <main class="flex-1 flex flex-col relative bg-[#F8FAFC]">
-            
             <div id="view-list" class="flex-1 flex flex-col overflow-hidden">
                 <div class="p-6 overflow-y-auto custom-scroll">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                        <div>
-                            <h2 class="text-2xl font-bold text-slate-800" id="list-title">All Employees</h2>
-                            <p class="text-sm text-slate-500">Manage employee records and job descriptions.</p>
-                        </div>
-                        <div class="relative w-full md:w-72">
-                            <input type="text" id="search-input" placeholder="Search by name, ID, position..." class="w-full border border-slate-300 rounded-lg pl-10 pr-4 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <i class="ph ph-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                        </div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800" id="list-title">All Employees</h2>
+                        <input type="text" id="search-input" placeholder="Search DB..." class="border border-slate-300 rounded-lg px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 w-64">
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="employee-grid">
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="employee-grid"></div>
                 </div>
             </div>
 
-            <div id="view-chart" class="hidden flex-1 overflow-hidden bg-slate-100 relative cursor-grab active:cursor-grabbing">
-                <div class="absolute top-5 left-5 z-50 flex flex-col gap-2">
-                    <div class="bg-white/90 backdrop-blur p-2 rounded-lg border shadow-sm flex gap-1">
-                        <button onclick="chart.zoom(-0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-minus"></i></button>
-                        <button onclick="chart.reset()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600 border-x border-slate-200"><i class="ph ph-arrows-out"></i></button>
-                        <button onclick="chart.zoom(0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-plus"></i></button>
-                    </div>
-                    <div class="bg-white/90 backdrop-blur p-3 rounded-lg border shadow-sm text-xs space-y-1">
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-blue-100 border border-blue-500 rounded"></span> Manager / Head</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-white border border-slate-300 rounded"></span> Staff</div>
-                        <div class="mt-2 text-slate-400 italic admin-only hidden">Tip: Click (+) to add sub-staff</div>
-                    </div>
+            <div id="view-chart" class="hidden flex-1 overflow-hidden bg-slate-100 relative">
+                <div class="absolute top-5 left-5 z-50 bg-white/90 p-2 rounded-lg border shadow-sm flex gap-1">
+                    <button onclick="chart.zoom(-0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-minus"></i></button>
+                    <button onclick="chart.reset()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-arrows-out"></i></button>
+                    <button onclick="chart.zoom(0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-plus"></i></button>
                 </div>
-
                 <div class="w-full h-full overflow-auto custom-scroll flex items-start justify-center pt-20" id="chart-viewport">
-                    <div class="tree-container tree" id="org-tree-root">
-                        </div>
+                    <div class="tree-container tree" id="org-tree-root"></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="emp-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[200] backdrop-blur-sm transition-opacity">
+    <div id="emp-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[200] backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
-            <div class="bg-slate-800 p-5 text-white flex justify-between items-center rounded-t-xl shrink-0">
-                <div>
-                    <h3 class="font-bold text-lg" id="modal-title">Employee Details</h3>
-                    <p class="text-xs text-slate-400">Enter information carefully</p>
-                </div>
-                <button onclick="app.closeModal('emp-modal')" class="text-slate-400 hover:text-white transition-colors"><i class="ph ph-x text-2xl"></i></button>
+            <div class="bg-slate-800 p-5 text-white flex justify-between items-center rounded-t-xl">
+                <h3 class="font-bold text-lg" id="modal-title">Employee Details</h3>
+                <button onclick="app.closeModal('emp-modal')" class="text-slate-400 hover:text-white"><i class="ph ph-x text-2xl"></i></button>
             </div>
-            
             <form onsubmit="app.saveEmployee(event)" class="p-6 space-y-4 overflow-y-auto custom-scroll flex-1">
-                <input type="hidden" id="inp-id">
+                <input type="hidden" id="inp-id"> <div class="col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Company</label>
+                    <select id="inp-company" class="w-full border p-2 rounded outline-none bg-white">
+                        <option>1.Care</option>
+                        <option>Care+</option>
+                    </select>
+                </div>
                 
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="col-span-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Emp ID</label>
-                        <input type="number" id="inp-real-id" required class="w-full border p-2 rounded bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Company</label>
-                        <select id="inp-company" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <option>1.Care</option>
-                            <option>Care+</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
-                    <input type="text" id="inp-name" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none font-medium">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Name</label>
+                    <input type="text" id="inp-name" required class="w-full border p-2 rounded outline-none font-medium">
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Department</label>
-                        <input type="text" id="inp-dept" required list="dept-list" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="inp-dept" required list="dept-list" class="w-full border p-2 rounded outline-none">
                         <datalist id="dept-list"></datalist>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Branch</label>
-                        <input type="text" id="inp-branch" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="inp-branch" required class="w-full border p-2 rounded outline-none">
                     </div>
                 </div>
-
-                <div class="p-3 bg-blue-50 rounded border border-blue-100">
-                    <label class="block text-xs font-bold text-blue-800 uppercase mb-1">Position / Job Title</label>
-                    <input type="text" id="inp-pos" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none mb-3 bg-white">
-                    
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="inp-isHead" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-sm font-bold text-slate-700">Is Department Head?</span>
+                
+                <div class="p-3 bg-yellow-50 rounded border border-yellow-200">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-yellow-800 uppercase">Rank (Hierarchy)</label>
+                        <span class="text-[10px] bg-yellow-200 text-yellow-800 px-1.5 rounded">Low = High Rank</span>
+                    </div>
+                    <input type="number" id="inp-rank" required min="1" max="10" class="w-full border p-2 rounded outline-none bg-white">
+                    <label class="flex items-center gap-2 mt-2 cursor-pointer">
+                        <input type="checkbox" id="inp-isHead" class="w-4 h-4 text-blue-600 rounded">
+                        <span class="text-xs text-slate-600">Is Department Head?</span>
                     </label>
-                    <p class="text-[10px] text-slate-500 pl-6 mt-0.5">Check this to make this person the parent node in the chart.</p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Job Description (JD)</label>
-                    <textarea id="inp-jd" rows="4" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Enter roles and responsibilities..."></textarea>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Position</label>
+                    <input type="text" id="inp-pos" required class="w-full border p-2 rounded outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">JD</label>
+                    <textarea id="inp-jd" rows="3" class="w-full border p-2 rounded outline-none text-sm"></textarea>
                 </div>
             </form>
-
-            <div class="p-4 border-t bg-slate-50 flex justify-end gap-3 rounded-b-xl shrink-0">
-                <button onclick="app.closeModal('emp-modal')" class="px-5 py-2 text-slate-600 hover:bg-slate-200 rounded font-medium transition-colors">Cancel</button>
-                <button onclick="document.querySelector('#emp-modal form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold shadow-md transition-transform active:scale-95">Save Employee</button>
+            <div class="p-4 border-t bg-slate-50 flex justify-end gap-3 rounded-b-xl">
+                <button onclick="app.closeModal('emp-modal')" class="px-5 py-2 text-slate-600 hover:bg-slate-200 rounded font-medium">Cancel</button>
+                <button onclick="document.querySelector('#emp-modal form').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold shadow-md">Save to DB</button>
             </div>
         </div>
     </div>
 
-      <div id="jd-view-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[200] backdrop-blur-sm p-4 transition-opacity duration-300">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col transform transition-all scale-100">
-        
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm" id="jd-avatar">
-                    AU
-                </div>
-                <div>
-                    <h3 class="font-bold text-2xl text-slate-800 leading-tight" id="jd-name">Name</h3>
-                    <p class="text-blue-600 font-medium" id="jd-pos">Position</p>
-                    <div class="mt-1 bg-white border border-slate-200 px-2 py-0.5 rounded text-[10px] inline-block font-mono text-slate-400">ID: <span id="jd-id-display">1</span></div>
-                </div>
-            </div>
-            <button onclick="app.closeModal('jd-view-modal')" class="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-200 rounded-full transition-colors">
-                <i class="ph ph-x text-2xl"></i>
-            </button>
-        </div>
-
-        <div class="p-6 space-y-6 overflow-y-auto custom-scroll max-h-[70vh]">
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Department</p>
-                    <p class="font-bold text-slate-700 text-sm" id="jd-dept">-</p>
-                </div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Branch</p>
-                    <p class="font-bold text-slate-700 text-sm" id="jd-branch">-</p>
-                </div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Company</p>
-                    <p class="font-bold text-slate-700 text-sm" id="jd-company">-</p>
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <div class="flex justify-between items-center">
-                    <h4 class="font-bold text-slate-800 text-lg">Job Description</h4>
-                    <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold uppercase border border-slate-200">Read Only</span>
-                </div>
-                <div class="bg-white border-2 border-slate-100 rounded-xl p-5 shadow-inner relative">
-                    <div id="jd-content" class="text-slate-600 leading-relaxed text-sm min-h-[200px] max-h-[350px] overflow-y-auto pr-2 custom-scroll whitespace-pre-line text-justify">
+    <div id="jd-view-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[200] backdrop-blur-sm p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm" id="jd-avatar">AU</div>
+                    <div>
+                        <h3 class="font-bold text-2xl text-slate-800 leading-tight" id="jd-name">Name</h3>
+                        <p class="text-blue-600 font-medium" id="jd-pos">Position</p>
+                        <div class="flex gap-2 mt-1">
+                            <span class="bg-white border border-slate-200 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400">ID: <span id="jd-id-display">1</span></span>
+                            <span class="bg-yellow-100 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold">Rank: <span id="jd-rank-display">1</span></span>
                         </div>
+                    </div>
+                </div>
+                <button onclick="app.closeModal('jd-view-modal')" class="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-200 rounded-full"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            <div class="p-6 space-y-6 overflow-y-auto custom-scroll max-h-[70vh]">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Department</p>
+                        <p class="font-bold text-slate-700 text-sm" id="jd-dept">-</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Branch</p>
+                        <p class="font-bold text-slate-700 text-sm" id="jd-branch">-</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Company</p>
+                        <p class="font-bold text-slate-700 text-sm" id="jd-company">-</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-lg">Job Description</h4>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold uppercase border border-slate-200">Read Only</span>
+                    </div>
+                    <div class="bg-white border-2 border-slate-100 rounded-xl p-5 shadow-inner">
+                        <div id="jd-content" class="text-slate-600 leading-relaxed text-sm min-h-[200px] max-h-[350px] overflow-y-auto pr-2 custom-scroll whitespace-pre-line text-justify"></div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="p-3 bg-slate-50 border-t border-slate-100 text-center">
-            <p class="text-[10px] text-slate-400">1.Care & Care+ HR Database System</p>
-        </div>
     </div>
-</div>
 
     <script>
-        // --- FULL 200 EMPLOYEE DATA ---
-        const fullData = [{"id": 1, "company": "1.Care", "branch": "MDY", "position": "Sr. Service Technician", "dept": "1.Care Service", "name": "Aung Zaw Win"}, {"id": 2, "company": "1.Care", "branch": "Head Office", "position": "Audit Manager", "dept": "Internal Audit", "name": "Saw Shwe Wa"}, {"id": 3, "company": "1.Care", "branch": "Head Office", "position": "Project Coordinator", "dept": "IT & Software Support", "name": "Paing Phyo Zaw"}, {"id": 4, "company": "1.Care", "branch": "YGN", "position": "Sr. Receptionist", "dept": "1.Care Support", "name": "Win Pa Pa Phyo"}, {"id": 5, "company": "1.Care", "branch": "MDY", "position": "Service Store", "dept": "1.Care Support", "name": "Phyu Phyu Hnin"}, {"id": 6, "company": "1.Care", "branch": "MLM", "position": "Service Admin", "dept": "1.Care Support", "name": "Yin Yin May"}, {"id": 7, "company": "1.Care", "branch": "Head Office", "position": "Operation Manager", "dept": "Head Office", "name": "Min Thura Kyaw"}, {"id": 8, "company": "1.Care", "branch": "MLM", "position": "Accountant", "dept": "Finance & Account", "name": "Mar Mar Lwin"}, {"id": 9, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Kaung Khant Zaw"}, {"id": 10, "company": "1.Care", "branch": "YGN", "position": "Service Admin", "dept": "1.Care Support", "name": "Ei Sandar"}, {"id": 11, "company": "1.Care", "branch": "MDY", "position": "Asst. Operation Manager", "dept": "1.Care Office", "name": "Ye Yint Htet"}, {"id": 12, "company": "1.Care", "branch": "MDY", "position": "Admin Supervisor", "dept": "HR & Admin", "name": "Zaw Lwin Aung"}, {"id": 13, "company": "1.Care", "branch": "YGN", "position": "Service Technician", "dept": "1.Care Service", "name": "Pyae Sone Kyaw"}, {"id": 14, "company": "1.Care", "branch": "MDY", "position": "Jr.Sevice Technician", "dept": "1.Care Service", "name": "Swan Min Htet"}, {"id": 15, "company": "1.Care", "branch": "YGN", "position": "Jr.Sevice Technician", "dept": "1.Care Service", "name": "Kaung Htet Kyaw"}, {"id": 16, "company": "1.Care", "branch": "MLM", "position": "Sr.Service Executive", "dept": "1.Care Service", "name": "Than Lin Tun"}, {"id": 17, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Thet Naing Tun"}, {"id": 18, "company": "1.Care", "branch": "MDY", "position": "Sr. Service Supervisor", "dept": "1.Care Service", "name": "Saw Htay Win"}, {"id": 19, "company": "1.Care", "branch": "MDY", "position": "Receptionist", "dept": "1.Care Support", "name": "Phyo Yadanar"}, {"id": 20, "company": "1.Care", "branch": "MDY", "position": "Service Technician", "dept": "1.Care Service", "name": "Thura Aung"}, {"id": 21, "company": "1.Care", "branch": "YGN", "position": "Sr. Operation Staff", "dept": "Brand Service Principle", "name": "Phyu Hnin Wai"}, {"id": 22, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Naung Naung Soe"}, {"id": 23, "company": "1.Care", "branch": "MDY", "position": "Accountant", "dept": "Finance & Account", "name": "Nandar Win"}, {"id": 24, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Yar Pyae"}, {"id": 25, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Win Thu Hein"}, {"id": 26, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Ya Wai Aung"}, {"id": 27, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Ye Yint Aung"}, {"id": 28, "company": "1.Care", "branch": "YGN", "position": "Sr. Service Technician", "dept": "1.Care Service", "name": "Win Hlaing"}, {"id": 29, "company": "1.Care", "branch": "MLM", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Swan Htet Naing"}, {"id": 30, "company": "1.Care", "branch": "MDY", "position": "Admin Assistant", "dept": "HR & Admin", "name": "Wai Lwin Tun"}, {"id": 31, "company": "1.Care", "branch": "MLM", "position": "Jr. Storekeeper", "dept": "1.Care Support", "name": "Zue Zue San"}, {"id": 32, "company": "1.Care", "branch": "YGN", "position": "Receptionist", "dept": "1.Care Office", "name": "Ei Thazin Moe"}, {"id": 33, "company": "1.Care", "branch": "MLM", "position": "Receptionist", "dept": "1.Care Support", "name": "Saung Thazin Lin"}, {"id": 34, "company": "1.Care", "branch": "YGN", "position": "Training & Development Executive", "dept": "HR & Admin", "name": "Nay Chi"}, {"id": 35, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Ni Ko Ko"}, {"id": 36, "company": "1.Care", "branch": "MDY", "position": "Service Technician", "dept": "1.Care Service", "name": "Aung Min Min"}, {"id": 37, "company": "1.Care", "branch": "MDY", "position": "Service Technician", "dept": "1.Care Service", "name": "Aung Myat Ko"}, {"id": 38, "company": "1.Care", "branch": "YGN", "position": "Service Technician", "dept": "1.Care Service", "name": "Thura Kyaw"}, {"id": 39, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Chan Nyein Lwin"}, {"id": 40, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Yein Zone"}, {"id": 41, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Zay Htet Aung"}, {"id": 42, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Kyaw Phyo Aung"}, {"id": 43, "company": "1.Care", "branch": "YGN", "position": "Receptionist", "dept": "1.Care Support", "name": "Thet Thet Mar"}, {"id": 44, "company": "1.Care", "branch": "YGN", "position": "Chief Accountant", "dept": "Finance & Account", "name": "Khin Htwe Myint"}, {"id": 45, "company": "1.Care", "branch": "YGN", "position": "Digital Marketing Assistant", "dept": "Digital Marketing", "name": "Khant Zayar Hein"}, {"id": 46, "company": "1.Care", "branch": "MDY", "position": "Operation Assistant", "dept": "Brand Service Principle", "name": "Wah Wah Myint"}, {"id": 47, "company": "1.Care", "branch": "MLM", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Zarni Naing"}, {"id": 48, "company": "1.Care", "branch": "YGN", "position": "Service Admin", "dept": "1.Care Support", "name": "Moe Thet Chal"}, {"id": 49, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Shine Min Ko"}, {"id": 50, "company": "1.Care", "branch": "YGN", "position": "Warehouse Assistant", "dept": "Brand Service Principle", "name": "Zarni Tun"}, {"id": 51, "company": "1.Care", "branch": "YGN", "position": "Operation Assistant", "dept": "Brand Service Principle", "name": "Thansin Cho"}, {"id": 52, "company": "1.Care", "branch": "MDY", "position": "Sr. Operation Assistant", "dept": "1.Care Office", "name": "Zayar Lin Maung"}, {"id": 53, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Htet Wai Hlyan"}, {"id": 54, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Lin Htet Aung"}, {"id": 55, "company": "1.Care", "branch": "YGN", "position": "Video Creator", "dept": "Digital Marketing", "name": "Ye Kaung Set"}, {"id": 56, "company": "1.Care", "branch": "MDY", "position": "Sr. Operation Assistant", "dept": "Brand Service Principle", "name": "May Zune Phyo"}, {"id": 57, "company": "1.Care", "branch": "MDY", "position": "Sr. Operation Assistant", "dept": "Brand Service Principle", "name": "Zin May Thin"}, {"id": 58, "company": "1.Care", "branch": "MDY", "position": "Sr. Operation Assistant", "dept": "Brand Service Principle", "name": "Soe Myint Naung"}, {"id": 59, "company": "1.Care", "branch": "YGN", "position": "Operation Assisatnt", "dept": "Brand Service Principle", "name": "Pyae Phyo Aung"}, {"id": 60, "company": "1.Care", "branch": "YGN", "position": "Warehouse Assistant", "dept": "Brand Service Principle", "name": "Phyu Phyu Thin"}, {"id": 61, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technicain", "dept": "1.Care Service", "name": "Wai Phyo Oo"}, {"id": 62, "company": "1.Care", "branch": "YGN", "position": "Receptionist", "dept": "1.Care Support", "name": "Aye Myat Thu"}, {"id": 63, "company": "1.Care", "branch": "YGN", "position": "Page Admin", "dept": "Digital Marketing", "name": "Thet Nwe Win"}, {"id": 64, "company": "1.Care", "branch": "YGN", "position": "Front Desk Supervisor", "dept": "1.Care Support", "name": "Yan Lin Naing"}, {"id": 65, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Aung Min Htay"}, {"id": 66, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Nyan Wint Zin"}, {"id": 67, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Moe Kalayar Tun"}, {"id": 68, "company": "1.Care", "branch": "YGN", "position": "Graphic Designer", "dept": "Digital Marketing", "name": "Thet Paing Soe"}, {"id": 69, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Htet Wai Phyo"}, {"id": 70, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Nyan Lin Htet"}, {"id": 71, "company": "1.Care", "branch": "MLM", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Moe Htet Naing"}, {"id": 72, "company": "1.Care", "branch": "MLM", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Kyaw Thiha"}, {"id": 73, "company": "1.Care", "branch": "YGN", "position": "Technician Head", "dept": "1.Care Service", "name": "Lwin Ko Ko"}, {"id": 74, "company": "1.Care", "branch": "YGN", "position": "General Manager", "dept": "1.Care Office", "name": "Kyaw Soe Moe Latt"}, {"id": 75, "company": "1.Care", "branch": "Magway", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Aung Phyo Ko"}, {"id": 76, "company": "1.Care", "branch": "YGN", "position": "HR Executive (R & S)", "dept": "HR & Admin", "name": "Aye Nyein Phyu"}, {"id": 77, "company": "1.Care", "branch": "MDY", "position": "Store Assistant", "dept": "1.Care Service", "name": "Thet Htoo Aung"}, {"id": 78, "company": "1.Care", "branch": "YGN", "position": "Xiaomi Operation Manager", "dept": "1.Care Service", "name": "Eindra Thu"}, {"id": 79, "company": "1.Care", "branch": "MDY", "position": "Service Technician", "dept": "1.Care Service", "name": "Thi Han Tun"}, {"id": 80, "company": "1.Care", "branch": "MDY", "position": "Receptionist", "dept": "1.Care Service", "name": "Zin Win Nwe"}, {"id": 81, "company": "1.Care", "branch": "YGN", "position": "Asst. Admin Supervisor", "dept": "HR & Admin", "name": "Kaung Khant Zaw"}, {"id": 82, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Ye Min Khant"}, {"id": 83, "company": "1.Care", "branch": "YGN", "position": "Accountant", "dept": "Brand Service Principle", "name": "Khaing Zar Win"}, {"id": 84, "company": "1.Care", "branch": "YGN", "position": "Sr. Technical Support", "dept": "Brand Service Principle", "name": "Saw Yan Niang"}, {"id": 85, "company": "1.Care", "branch": "MDY", "position": "Receptionist", "dept": "1.Care Support", "name": "Yu Nandar Oo"}, {"id": 86, "company": "1.Care", "branch": "YGN", "position": "Service Admin", "dept": "1.Care Support", "name": "Nway Nway Zin"}, {"id": 87, "company": "1.Care", "branch": "YGN", "position": "Internship", "dept": "1.Care Service", "name": "Myat Min Khant"}, {"id": 88, "company": "1.Care", "branch": "YGN", "position": "Service Manager", "dept": "1.Care Support", "name": "Khin Khin Htwe"}, {"id": 89, "company": "1.Care", "branch": "YGN", "position": "Warehouse Asst. Manager", "dept": "Brand Service Principle", "name": "Nyan Lynn"}, {"id": 90, "company": "1.Care", "branch": "YGN", "position": "Sr. Service Admin", "dept": "1.Care Support", "name": "Lin Lin Hlaing"}, {"id": 91, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Phyo Hein San"}, {"id": 92, "company": "1.Care", "branch": "YGN", "position": "HR Generalist", "dept": "HR & Admin", "name": "Zin Hnin Htet Wai Zaw"}, {"id": 93, "company": "1.Care", "branch": "MDY", "position": "Receptionist", "dept": "1.Care Support", "name": "Honey Oo"}, {"id": 94, "company": "1.Care", "branch": "YGN", "position": "Content Writer", "dept": "Digital Marketing", "name": "Win Htet Htet Khaing"}, {"id": 95, "company": "1.Care", "branch": "YGN", "position": "Receptionist", "dept": "1.Care Support", "name": "Thet Htar Wutt Yee"}, {"id": 96, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Aung Myint Myat"}, {"id": 97, "company": "1.Care", "branch": "YGN", "position": "Jr. IT", "dept": "IT & Software Support", "name": "Tar Yar Lin Htet"}, {"id": 98, "company": "1.Care", "branch": "YGN", "position": "HR & Admin Manager", "dept": "HR & Admin", "name": "Moe Moe Aung"}, {"id": 99, "company": "1.Care", "branch": "YGN", "position": "Sr. Accountant", "dept": "Finance & Account", "name": "Phyo Theingi"}, {"id": 100, "company": "1.Care", "branch": "YGN", "position": "Data Entry", "dept": "Finance & Account", "name": "Thae Mg Mg"}, {"id": 101, "company": "1.Care", "branch": "YGN", "position": "Operation Assistant", "dept": "1.Care Office", "name": "Shwe Ei Win"}, {"id": 102, "company": "1.Care", "branch": "MLM", "position": "Jr. Stock Controller", "dept": "1.Care Support", "name": "Nyein Win Aung"}, {"id": 103, "company": "1.Care", "branch": "YGN", "position": "Service Technician", "dept": "1.Care Service", "name": "Moe Zaw Oo"}, {"id": 104, "company": "1.Care", "branch": "YGN", "position": "Receptionist", "dept": "1.Care Support", "name": "May Lin Chal"}, {"id": 105, "company": "1.Care", "branch": "MDY", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Khit Min Thu"}, {"id": 106, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Pyae Phyo Kyaw"}, {"id": 107, "company": "1.Care", "branch": "YGN", "position": "Personal Accountant", "dept": "Finance & Account", "name": "Kaung Myo Htet"}, {"id": 108, "company": "1.Care", "branch": "MLM", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Sue Sha Aung"}, {"id": 109, "company": "1.Care", "branch": "YGN", "position": "Cashier", "dept": "Finance & Account", "name": "Mya Thandar Aung"}, {"id": 110, "company": "1.Care", "branch": "YGN", "position": "Jr. Graphic Designer", "dept": "Digital Marketing", "name": "Aung Bhone Myat"}, {"id": 111, "company": "1.Care", "branch": "YGN", "position": "Digital Marketing Manager", "dept": "Digital Marketing", "name": "Aye Nyein San"}, {"id": 112, "company": "1.Care", "branch": "YGN", "position": "Jr. Accountant", "dept": "Finance & Account", "name": "Theint Theint Zin"}, {"id": 113, "company": "1.Care", "branch": "YGN", "position": "Accountant", "dept": "Finance & Account", "name": "Phoo Pwint Khaing"}, {"id": 114, "company": "1.Care", "branch": "YGN", "position": "Store Assistant", "dept": "1.Care Support", "name": "Yoon Wint Wint Lwin"}, {"id": 115, "company": "1.Care", "branch": "MDY", "position": "Main Cashier", "dept": "Finance & Account", "name": "Yoon Nadi Phyo"}, {"id": 116, "company": "1.Care", "branch": "HTD", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Aung Pyae Phyo"}, {"id": 117, "company": "1.Care", "branch": "YGN", "position": "Jr. Service Technician", "dept": "1.Care Service", "name": "Shine Ko Oo"}, {"id": 118, "company": "1.Care", "branch": "YGN", "position": "Service Technician", "dept": "1.Care Service", "name": "Kaung Han Nyein"}, {"id": 119, "company": "Care+", "branch": "YGN", "position": "Sales Admin", "dept": "Sales & Marketing", "name": "Khin Khin Phyo"}, {"id": 120, "company": "Care+", "branch": "MDY", "position": "Sale & Marketing Supervisor", "dept": "Sales & Marketing", "name": "Thiri Maung"}, {"id": 121, "company": "Care+", "branch": "MDY", "position": "Sale & Marketing Supervisor", "dept": "Sales & Marketing", "name": "Pann Moh Moh Zaw"}, {"id": 122, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Saung Eaindra Lin"}, {"id": 123, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Aye Nadi Wai"}, {"id": 124, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Phyu Phyu Thant"}, {"id": 125, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Yoon Mee Mee Kyaw"}, {"id": 126, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Ei Thet Htun"}, {"id": 127, "company": "Care+", "branch": "Kyaukse", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Yoon Nadi Shwe"}, {"id": 128, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Zin Mar Thin"}, {"id": 129, "company": "Care+", "branch": "Taunggyi", "position": "Sales Supervisor", "dept": "Sales & Marketing", "name": "Hnin Wuit Yee Khaing"}, {"id": 130, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Thaw Zin Soe"}, {"id": 131, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Phyu Thazin Aung"}, {"id": 132, "company": "Care+", "branch": "Monywa", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Su Nandar Aung"}, {"id": 133, "company": "Care+", "branch": "YGN", "position": "Sr.Customer Care", "dept": "Customer Service", "name": "Win Thida Aung"}, {"id": 134, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Ei Shwe Sin"}, {"id": 135, "company": "Care+", "branch": "YGN", "position": "Asst. Sales Admin", "dept": "Sales & Marketing", "name": "Thant Zaw Htoo"}, {"id": 136, "company": "Care+", "branch": "Myitkyinar", "position": "Sales Supervisor", "dept": "Sales & Marketing", "name": "Thazin Nyein"}, {"id": 137, "company": "Care+", "branch": "NPT", "position": "Promotion Staff Leader", "dept": "Sales & Marketing", "name": "Yamin Thu"}, {"id": 138, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Khin Myo Han"}, {"id": 139, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Yu Yu Nwe"}, {"id": 140, "company": "Care+", "branch": "MDY", "position": "Sr. Sales & Operation Sipervisor", "dept": "Sales & Marketing", "name": "Htun Htun Naing"}, {"id": 141, "company": "Care+", "branch": "YGN", "position": "Asst. Customer Care", "dept": "Customer Service", "name": "Hnin Wathone"}, {"id": 142, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Win Pa Pa Hlaing"}, {"id": 143, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Chit Oo Maung"}, {"id": 144, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Thin Lae Lae Hnin"}, {"id": 145, "company": "Care+", "branch": "YGN", "position": "Regional Sales Manager", "dept": "Sales & Marketing", "name": "Kyaw Win Hlaing"}, {"id": 146, "company": "Care+", "branch": "Myitkyinar", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Htet Sandi Aung"}, {"id": 147, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Kay Thwe Aung"}, {"id": 148, "company": "Care+", "branch": "Aung Ban", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Lwin Lwin Aung"}, {"id": 149, "company": "Care+", "branch": "Aung Ban", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Min Thu"}, {"id": 150, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Soe Htet Naung"}, {"id": 151, "company": "Care+", "branch": "YGN", "position": "Sales Supervisor", "dept": "Sales & Marketing", "name": "Hein Bo Bo Soe"}, {"id": 152, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Su Nandar Naing"}, {"id": 153, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Thae Chit Su"}, {"id": 154, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Aye Chan Moe"}, {"id": 155, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Elliya"}, {"id": 156, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Moh Moh Tun"}, {"id": 157, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Min Nadi Lwin"}, {"id": 158, "company": "Care+", "branch": "YGN", "position": "Housekeeping", "dept": "HR & Admin", "name": "Win Pa Pa Myo"}, {"id": 159, "company": "Care+", "branch": "YGN", "position": "Promotion Staff Leader", "dept": "Sales & Marketing", "name": "Ingyin Phway"}, {"id": 160, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Ye Yin Thu"}, {"id": 161, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Moe Hnin Pwint"}, {"id": 162, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Myat Myat Aye Aung"}, {"id": 163, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Su Su Hlaing"}, {"id": 164, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Saw Yu Nwe"}, {"id": 165, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "May Myat Noe Khin"}, {"id": 166, "company": "Care+", "branch": "Kalay", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Su Sandi Thein"}, {"id": 167, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Zin Ko Aung"}, {"id": 168, "company": "Care+", "branch": "Myitkyinar", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Thae Thae Phyu"}, {"id": 169, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Paing Htet Oo"}, {"id": 170, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Zaw Moe Htay"}, {"id": 171, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Shoon Lae Khaing"}, {"id": 172, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Yoon Khat Wai"}, {"id": 173, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Aung Zin Thant"}, {"id": 174, "company": "Care+", "branch": "Monywa", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Shwe Zin Win"}, {"id": 175, "company": "Care+", "branch": "Sagaing", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "La Woon Nge Nge"}, {"id": 176, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Zin Mie Mie Sint"}, {"id": 177, "company": "Care+", "branch": "YGN", "position": "National Sales Executive", "dept": "Sales & Marketing", "name": "Hein Min Wai"}, {"id": 178, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Ya Wai Aung"}, {"id": 179, "company": "Care+", "branch": "Hpa-an", "position": "Sales Leader", "dept": "Sales & Marketing", "name": "Soe Sandar Lin"}, {"id": 180, "company": "Care+", "branch": "YGN", "position": "Sales Leader", "dept": "Sales & Marketing", "name": "Ye Myat Lwin"}, {"id": 181, "company": "Care+", "branch": "NPT", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Gandawin Moe"}, {"id": 182, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Zin Min Htet"}, {"id": 183, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Thazin Oo"}, {"id": 184, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Swan Htet Naing"}, {"id": 185, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Thaw Han Saung"}, {"id": 186, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Aung Myo Hein"}, {"id": 187, "company": "Care+", "branch": "Monywa", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "May Thu Lin Maung"}, {"id": 188, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Htet Myat Aung"}, {"id": 189, "company": "Care+", "branch": "MLM", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Ei Kay Zin"}, {"id": 190, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Zar Chi Htwe"}, {"id": 191, "company": "Care+", "branch": "Taunggyi", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Kay Thi Hlaing"}, {"id": 192, "company": "Care+", "branch": "Taunggyi", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Chit Su Thwe"}, {"id": 193, "company": "Care+", "branch": "MLM", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Win Theingi"}, {"id": 194, "company": "Care+", "branch": "Hpa-an", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Honey Thaw"}, {"id": 195, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Ye Lin Aung"}, {"id": 196, "company": "Care+", "branch": "YGN", "position": "Customer Care", "dept": "Customer Service", "name": "Eaint Thet Hmue Zaw"}, {"id": 197, "company": "Care+", "branch": "Myitkyinar", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "May Zin Lin"}, {"id": 198, "company": "Care+", "branch": "MDY", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Pann Su Su Htwe"}, {"id": 199, "company": "Care+", "branch": "YGN", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Hnin Eaint Shwe"}, {"id": 200, "company": "Care+", "branch": "Hpa-an", "position": "Sales Promoter", "dept": "Sales & Marketing", "name": "Khaing Thazin Zaw"}];
+        // API Configuration (Replace this with your actual Netlify Function URL)
+        const API_URL = '/.netlify/functions/employees'; 
 
-        // --- AUTH ---
+        // --- AUTH & DB SYSTEM (Using API) ---
         const auth = {
             currentUser: null,
             init() {
@@ -319,17 +264,16 @@
                 if (session) {
                     this.currentUser = JSON.parse(session);
                     this.applyRole();
-                } else {
-                    document.getElementById('login-overlay').classList.remove('hidden');
-                }
+                    app.init(); // Load Data
+                } else document.getElementById('login-overlay').classList.remove('hidden');
             },
             login(e) {
                 e.preventDefault();
                 const u = document.getElementById('login-user').value.toLowerCase();
                 const p = document.getElementById('login-pass').value;
-                if (u === 'admin' && p === '1234') this.setSession({ role: 'admin' });
-                else if (u === 'guest' && p === '1234') this.setSession({ role: 'viewer' });
-                else alert('Invalid Login!');
+                if ((u === 'admin' || u === 'guest') && p === '1234') {
+                    this.setSession({ role: u === 'admin' ? 'admin' : 'viewer' });
+                } else alert('Invalid Login!');
             },
             setSession(user) {
                 this.currentUser = user;
@@ -338,35 +282,56 @@
                 this.applyRole();
                 app.init();
             },
-            logout() {
-                sessionStorage.removeItem('user_session');
-                location.reload();
-            },
+            logout() { sessionStorage.removeItem('user_session'); location.reload(); },
             applyRole() {
                 const isAdmin = this.currentUser.role === 'admin';
                 document.getElementById('user-role-badge').textContent = isAdmin ? 'Admin' : 'Viewer';
-                document.body.classList.toggle('is-admin', isAdmin);
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
             }
         };
 
-        // --- DB ---
         const db = {
-            key: 'emp_db_full_v3',
-            get() {
-                const data = localStorage.getItem(this.key);
-                return data ? JSON.parse(data) : fullData;
+            async getAll() {
+                try {
+                    // MOCKING DATA FOR DEMO IF NO API - REPLACE WITH fetch(API_URL)
+                    // const res = await fetch(API_URL);
+                    // return await res.json();
+                    
+                    // For demo purposes, simulating Async Delay
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            const local = localStorage.getItem('mock_db');
+                            resolve(local ? JSON.parse(local) : []);
+                        }, 500);
+                    });
+                } catch (e) {
+                    console.error("DB Error", e);
+                    return [];
+                }
             },
-            save(data) { localStorage.setItem(this.key, JSON.stringify(data)); },
-            add(emp) { const d = this.get(); d.push(emp); this.save(d); },
-            update(emp) { 
-                const d = this.get(); 
-                const idx = d.findIndex(e => e.id == emp.id);
-                if(idx !== -1) { d[idx] = emp; this.save(d); }
+            async save(emp) {
+                // REPLACE WITH: 
+                // await fetch(API_URL, { method: 'POST', body: JSON.stringify(emp) ... });
+                
+                // Mock Logic
+                const d = JSON.parse(localStorage.getItem('mock_db') || "[]");
+                if(emp.id) {
+                     const idx = d.findIndex(e => e.id == emp.id);
+                     if(idx !== -1) d[idx] = emp;
+                } else {
+                    emp.id = Date.now(); // Temp ID for mock
+                    d.push(emp);
+                }
+                localStorage.setItem('mock_db', JSON.stringify(d));
             },
-            delete(id) {
-                const d = this.get().filter(e => e.id != id);
-                this.save(d);
+            async delete(id) {
+                // REPLACE WITH:
+                // await fetch(API_URL, { method: 'DELETE', body: JSON.stringify({id}) ... });
+                
+                // Mock Logic
+                let d = JSON.parse(localStorage.getItem('mock_db') || "[]");
+                d = d.filter(e => e.id != id);
+                localStorage.setItem('mock_db', JSON.stringify(d));
             }
         };
 
@@ -383,14 +348,16 @@
             }
         };
 
-        // --- APP ---
+        // --- APP LOGIC ---
         const app = {
             data: [],
             state: { view: 'list', dept: 'All', search: '' },
 
-            init() {
-                this.data = db.get();
-                if(!localStorage.getItem(db.key)) db.save(this.data);
+            async init() {
+                this.toggleLoading(true);
+                this.data = await db.getAll();
+                this.toggleLoading(false);
+                
                 this.renderSidebar();
                 this.renderList();
                 this.renderChart();
@@ -401,19 +368,28 @@
                 });
             },
 
+            toggleLoading(show) {
+                document.getElementById('loading-overlay').classList.toggle('hidden', !show);
+                document.getElementById('loading-overlay').classList.toggle('flex', show);
+            },
+
             switchView(view) {
                 this.state.view = view;
                 document.getElementById('view-list').classList.toggle('hidden', view !== 'list');
                 document.getElementById('view-chart').classList.toggle('hidden', view !== 'chart');
+                
                 const btnList = document.getElementById('btn-list');
                 const btnChart = document.getElementById('btn-chart');
+                const activeClass = ['bg-white','text-indigo-600','shadow'];
+                const inactiveClass = ['text-slate-500'];
                 
                 if(view === 'list') {
-                    btnList.classList.add('bg-white','text-indigo-600','shadow'); btnList.classList.remove('text-slate-500');
-                    btnChart.classList.remove('bg-white','text-indigo-600','shadow'); btnChart.classList.add('text-slate-500');
+                    btnList.classList.add(...activeClass); btnList.classList.remove(...inactiveClass);
+                    btnChart.classList.remove(...activeClass); btnChart.classList.add(...inactiveClass);
                 } else {
-                    btnChart.classList.add('bg-white','text-indigo-600','shadow'); btnChart.classList.remove('text-slate-500');
-                    btnList.classList.remove('bg-white','text-indigo-600','shadow'); btnList.classList.add('text-slate-500');
+                    btnChart.classList.add(...activeClass); btnChart.classList.remove(...inactiveClass);
+                    btnList.classList.remove(...activeClass); btnList.classList.add(...inactiveClass);
+                    this.renderChart(); 
                 }
             },
 
@@ -434,7 +410,6 @@
                             <span class="truncate pr-2">${d}</span> <span class="bg-slate-200 px-1.5 rounded text-xs py-0.5">${c}</span>
                         </button>`;
                 });
-                document.getElementById('sidebar-total').innerText = this.data.length;
             },
 
             filterDept(d) {
@@ -449,13 +424,16 @@
                 grid.innerHTML = '';
                 const filtered = this.data.filter(e => {
                     const matchDept = this.state.dept === 'All' || e.dept === this.state.dept;
-                    const matchSearch = e.name.toLowerCase().includes(this.state.search) || String(e.id).includes(this.state.search) || e.position.toLowerCase().includes(this.state.search);
+                    const matchSearch = e.name.toLowerCase().includes(this.state.search) || String(e.id).includes(this.state.search);
                     return matchDept && matchSearch;
                 });
                 document.getElementById('list-title').innerText = this.state.dept === 'All' ? 'All Employees' : this.state.dept;
+                filtered.sort((a,b) => (a.rank || 99) - (b.rank || 99));
 
                 filtered.forEach(e => {
                     const isAdmin = auth.currentUser.role === 'admin';
+                    const rankColor = e.rank == 1 ? 'bg-blue-100 text-blue-700 border-blue-200' : (e.rank == 2 ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-slate-100 text-slate-500 border-slate-200');
+                    
                     const card = document.createElement('div');
                     card.className = "bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all group relative";
                     card.innerHTML = `
@@ -471,22 +449,22 @@
                         </div>
                         <h3 class="font-bold text-slate-800 truncate" title="${e.name}">${e.name} ${e.isHead ? '<i class="ph-fill ph-crown text-yellow-500 text-xs"></i>':''}</h3>
                         <p class="text-xs text-indigo-600 font-semibold truncate mb-2">${e.position}</p>
-                        <div class="flex flex-wrap gap-1">
-                            <span class="text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">${e.branch}</span>
+                        <div class="flex items-center justify-between mt-2">
+                             <span class="text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">${e.branch}</span>
+                             <span class="text-[10px] px-2 py-0.5 rounded border font-bold ${rankColor}">Rank ${e.rank || '-'}</span>
                         </div>
                     `;
                     grid.appendChild(card);
                 });
             },
 
-            // --- CHART RENDERING (NESTED LOGIC) ---
+            // --- CHART RENDERING (RANK BASED) ---
             renderChart() {
                 const root = document.getElementById('org-tree-root');
                 root.innerHTML = '';
                 
                 let chartData = this.state.dept === 'All' ? this.data : this.data.filter(e => e.dept === this.state.dept);
                 
-                // Group by Company -> Dept
                 const tree = {};
                 chartData.forEach(e => {
                     if(!tree[e.company]) tree[e.company] = {};
@@ -501,40 +479,36 @@
                     html += `<li><div class="tree-node company shadow-lg">${comp}</div><ul>`;
                     
                     for (const [deptName, staff] of Object.entries(depts)) {
-                        // Find Head: 1. Manual Flag 2. "Manager"/"Head" title
-                        let lead = staff.find(s => s.isHead === true);
-                        if (!lead) lead = staff.find(s => s.position.toLowerCase().includes('manager') || s.position.toLowerCase().includes('head'));
+                        staff.sort((a,b) => (a.rank || 99) - (b.rank || 99));
+
+                        html += `<li><div class="tree-node dept shadow">${deptName}</div>`;
                         
-                        let others = staff.filter(s => s !== lead);
+                        // Hierarchical Logic: Leader is Min Rank.
+                        if (staff.length > 0) {
+                            const leaderRank = staff[0].rank || 99;
+                            const leaders = staff.filter(s => (s.rank || 99) === leaderRank);
+                            const subordinates = staff.filter(s => (s.rank || 99) > leaderRank);
 
-                        html += `<li><div class="tree-node dept shadow">${deptName}</div><ul>`;
-
-                        if (lead) {
-                            // Render Head
-                            html += `<li>`;
-                            html += this.createNode(lead, true);
-                            
-                            // If Head exists, Staff goes UNDER Head
-                            if (others.length > 0) {
-                                html += `<ul>`;
-                                // If too many staff, create a group node, else list them
-                                if (others.length > 10) {
-                                     html += `<li><div class="tree-node staff-group">${others.length} Staff Members</div><ul>`;
-                                     // Show first 5
-                                     html += others.slice(0,5).map(o => `<li>${this.createNode(o, false, false)}</li>`).join(''); 
-                                     html += `<li><span class="text-xs text-slate-400">...and ${others.length-5} more</span></li>`;
-                                     html += `</ul></li>`;
-                                } else {
-                                     html += others.map(o => `<li>${this.createNode(o, false, false)}</li>`).join('');
+                            html += `<ul>`;
+                            leaders.forEach(lead => {
+                                html += `<li>`;
+                                html += this.createNode(lead);
+                                if (lead === leaders[leaders.length-1] && subordinates.length > 0) {
+                                     html += `<ul>`;
+                                     if(subordinates.length > 8) {
+                                         html += `<li><div class="tree-node staff">... ${subordinates.length} Staff ...</div><ul>`;
+                                         subordinates.forEach(sub => { html += `<li>${this.createNode(sub)}</li>`; });
+                                         html += `</ul></li>`;
+                                     } else {
+                                         subordinates.forEach(sub => { html += `<li>${this.createNode(sub)}</li>`; });
+                                     }
+                                     html += `</ul>`;
                                 }
-                                html += `</ul>`;
-                            }
-                            html += `</li>`;
-                        } else {
-                            // No Head Found -> Staff connect directly to Dept
-                            html += others.map(o => `<li>${this.createNode(o, false, false)}</li>`).join('');
+                                html += `</li>`;
+                            });
+                            html += `</ul>`;
                         }
-                        html += `</ul></li>`;
+                        html += `</li>`;
                     }
                     html += `</ul></li>`;
                 }
@@ -542,49 +516,33 @@
                 root.innerHTML = html;
             },
 
-            createNode(emp, isLead = false) {
+            createNode(emp) {
                 const isAdmin = auth.currentUser.role === 'admin';
+                const rankClass = `rank-${emp.rank > 4 ? 4 : emp.rank}`;
                 return `
-                    <div class="tree-node ${isLead ? 'manager' : 'staff'} group">
+                    <div class="tree-node ${rankClass} group">
                         <div class="font-bold truncate text-slate-700">${emp.name}</div>
                         <div class="text-[10px] text-slate-500 truncate opacity-90">${emp.position}</div>
-                        <div class="text-[9px] text-slate-400">${emp.branch}</div>
+                        <div class="flex justify-between items-center mt-1">
+                            <div class="text-[9px] text-slate-400">${emp.branch}</div>
+                            <div class="text-[9px] font-bold bg-white/50 px-1 rounded text-slate-600">R-${emp.rank||'?'}</div>
+                        </div>
                         
-                        ${isAdmin && isLead ? `
-                            <button onclick="app.addUnder(${emp.id})" class="absolute -top-3 -right-3 w-6 h-6 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-md z-50" title="Add Staff Under This Head">
-                                <i class="ph-bold ph-plus text-xs"></i>
-                            </button>
-                        ` : ''}
-
                         <div class="node-actions">
                             <button onclick="app.viewJD(${emp.id})" class="text-[10px] text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-600">JD</button>
-                            ${isAdmin ? `
-                                <button onclick="app.editEmployee(${emp.id})" class="text-[10px] text-white bg-blue-500 px-2 py-0.5 rounded hover:bg-blue-600">Edit</button>
-                            ` : ''}
+                            ${isAdmin ? `<button onclick="app.editEmployee(${emp.id})" class="text-[10px] text-white bg-blue-500 px-2 py-0.5 rounded hover:bg-blue-600">Edit</button>` : ''}
                         </div>
                     </div>
                 `;
             },
 
             // --- CRUD ---
-            addUnder(headId) {
-                const head = this.data.find(e => e.id == headId);
-                if(!head) return;
-                this.openAddModal();
-                // Pre-fill Dept & Branch from Head
-                document.getElementById('inp-company').value = head.company;
-                document.getElementById('inp-dept').value = head.dept;
-                document.getElementById('inp-branch').value = head.branch;
-                document.getElementById('modal-title').innerText = `Add Staff under ${head.name}`;
-            },
-
             openAddModal() {
                 document.getElementById('emp-modal').classList.remove('hidden');
                 document.getElementById('modal-title').innerText = "Add New Employee";
                 document.querySelector('#emp-modal form').reset();
-                document.getElementById('inp-real-id').disabled = false;
-                const max = this.data.length > 0 ? Math.max(...this.data.map(e=>e.id)) : 0;
-                document.getElementById('inp-real-id').value = max + 1;
+                document.getElementById('inp-id').value = ""; // Empty for New
+                document.getElementById('inp-rank').value = 5;
             },
 
             editEmployee(id) {
@@ -593,77 +551,68 @@
                 document.getElementById('emp-modal').classList.remove('hidden');
                 document.getElementById('modal-title').innerText = "Edit Employee";
                 
-                document.getElementById('inp-real-id').value = emp.id;
-                document.getElementById('inp-real-id').disabled = true;
+                document.getElementById('inp-id').value = emp.id;
                 document.getElementById('inp-company').value = emp.company;
                 document.getElementById('inp-name').value = emp.name;
                 document.getElementById('inp-dept').value = emp.dept;
                 document.getElementById('inp-branch').value = emp.branch;
                 document.getElementById('inp-pos').value = emp.position;
+                document.getElementById('inp-rank').value = emp.rank || 5;
                 document.getElementById('inp-isHead').checked = emp.isHead || false;
                 document.getElementById('inp-jd').value = emp.jd || "";
             },
 
-            saveEmployee(e) {
+            async saveEmployee(e) {
                 e.preventDefault();
-                const id = parseInt(document.getElementById('inp-real-id').value);
-                const isEdit = document.getElementById('inp-real-id').disabled;
+                this.toggleLoading(true);
 
+                const idInput = document.getElementById('inp-id').value;
                 const empObj = {
-                    id: id,
+                    id: idInput ? parseInt(idInput) : null,
                     company: document.getElementById('inp-company').value,
                     name: document.getElementById('inp-name').value,
                     dept: document.getElementById('inp-dept').value,
                     branch: document.getElementById('inp-branch').value,
                     position: document.getElementById('inp-pos').value,
+                    rank: parseInt(document.getElementById('inp-rank').value) || 5,
                     isHead: document.getElementById('inp-isHead').checked,
                     jd: document.getElementById('inp-jd').value
                 };
 
-                if (isEdit) db.update(empObj);
-                else {
-                    if(this.data.some(x=>x.id==id)) { alert('ID exists'); return; }
-                    db.add(empObj);
-                }
-                
-                this.data = db.get();
+                await db.save(empObj);
+                this.data = await db.getAll(); // Refresh
+                this.toggleLoading(false);
                 this.closeModal('emp-modal');
-                this.filterDept(this.state.dept); // Refresh view
+                this.filterDept(this.state.dept);
             },
 
-            deleteEmployee(id) {
+            async deleteEmployee(id) {
                 if(confirm("Delete this employee?")) {
-                    db.delete(id);
-                    this.data = db.get();
+                    this.toggleLoading(true);
+                    await db.delete(id);
+                    this.data = await db.getAll();
+                    this.toggleLoading(false);
                     this.filterDept(this.state.dept);
                 }
             },
 
-             viewJD(id) {
-    const emp = this.data.find(e => e.id == id);
-    if(!emp) return;
-    
-    // Header Info
-    document.getElementById('jd-name').innerText = emp.name;
-    document.getElementById('jd-pos').innerText = emp.position;
-    document.getElementById('jd-id-display').innerText = emp.id;
-    document.getElementById('jd-avatar').innerText = emp.name.substring(0,2).toUpperCase();
-    
-    // Grid Info (New)
-    document.getElementById('jd-dept').innerText = emp.dept;
-    document.getElementById('jd-branch').innerText = emp.branch;
-    document.getElementById('jd-company').innerText = emp.company;
-    
-    // Default JD Text if empty
-    const defaultJD = `A job description is a formal document outlining a specific role's purpose, key responsibilities, required qualifications, skills, and reporting structure. It serves as a vital hiring tool, setting clear performance expectations for employees while helping employers attract qualified candidates.`;
-    
-    document.getElementById('jd-content').innerText = emp.jd || defaultJD;
-    
-    // Show Modal (Flex for centering)
-    const modal = document.getElementById('jd-view-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-},
+            viewJD(id) {
+                const emp = this.data.find(e => e.id == id);
+                if(!emp) return;
+                document.getElementById('jd-name').innerText = emp.name;
+                document.getElementById('jd-pos').innerText = emp.position;
+                document.getElementById('jd-id-display').innerText = emp.id;
+                document.getElementById('jd-rank-display').innerText = emp.rank || '-';
+                document.getElementById('jd-avatar').innerText = emp.name.substring(0,2).toUpperCase();
+                document.getElementById('jd-dept').innerText = emp.dept;
+                document.getElementById('jd-branch').innerText = emp.branch;
+                document.getElementById('jd-company').innerText = emp.company;
+                document.getElementById('jd-content').innerText = emp.jd || "No JD Available.";
+                
+                const modal = document.getElementById('jd-view-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            },
 
             closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         };

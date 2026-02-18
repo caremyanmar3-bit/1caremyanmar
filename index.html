@@ -250,7 +250,8 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobnhpZ2Z2eXdpend3b29rZWpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMzMwMTEsImV4cCI6MjA4NjgwOTAxMX0.PIcBr-C_046mUrP5VUnCrulpp51oyiTcE48OVq03jcg'; // ဥပမာ - 'eyJhbGci...'
         // ==========================================
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
         // --- AUTH (Login စနစ်) ---
         const auth = {
@@ -289,33 +290,37 @@
         };
 
         // --- DB (SUPABASE OPERATIONS) ---
-        const db = {
-            async getAll() {
-                // Key မထည့်ရသေးရင် Alert ပြမယ်
-                if(SUPABASE_URL.includes('YOUR_')) {
-                    alert("🚨 Supabase Key တွေ မထည့်ရသေးပါဘူး။ Code ထဲမှာ သွားထည့်ပေးပါ။");
-                    return [];
-                }
-                const { data, error } = await supabase.from('employees').select('*');
-                if (error) { console.error("DB Error:", error); return []; }
-                return data;
-            },
-            async add(emp) {
-                const { data, error } = await supabase.from('employees').insert([emp]).select();
-                if (error) { console.error("Add Error:", error); alert("Error saving to cloud!"); return false; }
-                return true;
-            },
-            async update(id, emp) {
-                const { error } = await supabase.from('employees').update(emp).eq('id', id);
-                if (error) { console.error("Update Error:", error); return false; }
-                return true;
-            },
-            async delete(id) {
-                const { error } = await supabase.from('employees').delete().eq('id', id);
-                if (error) { console.error("Delete Error:", error); return false; }
-                return true;
-            }
-        };
+        
+const db = {
+    async getAll() {
+        if(SUPABASE_URL.includes('YOUR_')) {
+            alert("🚨 Supabase Key တွေ မထည့်ရသေးပါဘူး။ Code ထဲမှာ သွားထည့်ပေးပါ။");
+            return [];
+        }
+        const { data, error } = await sb.from('employees').select('*');
+        if (error) { console.error("DB Error:", error); return []; }
+        return data;
+    },
+
+    async add(emp) {
+        const { error } = await sb.from('employees').insert([emp]);
+        if (error) { console.error("Add Error:", error); alert("Error saving to cloud!"); return false; }
+        return true;
+    },
+
+    async update(id, emp) {
+        const { error } = await sb.from('employees').update(emp).eq('id', id);
+        if (error) { console.error("Update Error:", error); return false; }
+        return true;
+    },
+
+    async delete(id) {
+        const { error } = await sb.from('employees').delete().eq('id', id);
+        if (error) { console.error("Delete Error:", error); return false; }
+        return true;
+    }
+};
+
 
         // --- CHART CONTROLS ---
         const chart = {

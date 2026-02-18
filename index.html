@@ -12,19 +12,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ဖောင့်နှင့် ဒီဇိုင်းပိုင်းဆိုင်ရာ CSS များ */
         body { font-family: 'Noto Sans Myanmar', sans-serif; background-color: #F1F5F9; }
         
-        /* Scrollbar အလှဆင်ခြင်း */
+        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         
-        /* Org Chart (သစ်ပင်ပုံစံ) အတွက် CSS */
+        /* Tree Structure CSS */
         .tree-container { display: flex; justify-content: center; padding-bottom: 80px; transform-origin: top center; transition: transform 0.3s ease; }
         .tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
         .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; }
         
-        /* အကိုင်းအခက် မျဉ်းကြောင်းများ */
+        /* Connectors */
         .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #64748b; width: 50%; height: 20px; }
         .tree li::after { right: auto; left: 50%; border-left: 1px solid #64748b; }
         .tree li:only-child::after, .tree li:only-child::before { display: none; }
@@ -34,7 +33,7 @@
         .tree li:first-child::after { border-radius: 5px 0 0 0; }
         .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 1px solid #64748b; width: 0; height: 20px; }
         
-        /* ဝန်ထမ်းကဒ်ပြား ဒီဇိုင်း */
+        /* Employee Node Card */
         .tree-node { 
             border: 1px solid #cbd5e1; padding: 10px; display: inline-block; 
             border-radius: 12px; background: white; transition: all 0.3s; 
@@ -43,15 +42,16 @@
         }
         .tree-node:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 50; border-color: #3b82f6; }
         
-        /* အရောင်ခွဲခြားခြင်း */
+        /* Node Types */
         .tree-node.company { background: #1e293b; color: white; border: none; font-size: 14px; font-weight: bold; }
         .tree-node.dept { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: bold; }
         
-        /* Rank အလိုက် အရောင်များ (နံပတ်ကြီးလေ ရာထူးကြီးလေ) */
+        /* Rank Colors (High Num = High Rank) */
         .rank-high { background: #eff6ff; border-left: 4px solid #3b82f6; } /* Rank 8-10 (Manager) */
         .rank-med { background: #f5f3ff; border-left: 4px solid #8b5cf6; } /* Rank 5-7 (Supervisor) */
         .rank-low { border-left: 4px solid #cbd5e1; } /* Rank 1-4 (Staff) */
         
+        /* Hover Actions */
         .node-actions { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #334155; padding: 4px; border-radius: 6px; gap: 4px; z-index: 100; margin-top: 5px; }
         .tree-node:hover .node-actions { display: flex; }
         
@@ -244,10 +244,10 @@
     <script>
         // ==========================================
         // 🚨 🚨 🚨 🚨 🚨
-        // ဒီနေရာမှာ Supabase Project က ရလာတဲ့ URL နဲ့ KEY ကို ထည့်ပေးရပါမယ်။
+        // ဒီနေရာမှာ Supabase URL နဲ့ KEY ကို ကိုယ်တိုင်ဖြည့်ပါ
         // ==========================================
-        const SUPABASE_URL = 'https://fjrllvtkbehysuhapnob.supabase.co'; // ဥပမာ - 'https://xyz.supabase.co'
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqcmxsdnRrYmVoeXN1aGFwbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODI1OTcsImV4cCI6MjA4Njc1ODU5N30.GcrORx1vnZ4BAm6ZSjxyFtvBeOZGDLofORMz-VnG55k'; // ဥပမာ - 'eyJhbGci...'
+        const SUPABASE_URL = 'https://phnxigfvywizwwookejo.supabase.co'; // ဥပမာ - 'https://xyz.supabase.co'
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobnhpZ2Z2eXdpend3b29rZWpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMzMwMTEsImV4cCI6MjA4NjgwOTAxMX0.PIcBr-C_046mUrP5VUnCrulpp51oyiTcE48OVq03jcg'; // ဥပမာ - 'eyJhbGci...'
         // ==========================================
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -267,7 +267,8 @@
                 e.preventDefault();
                 const u = document.getElementById('login-user').value.toLowerCase();
                 const p = document.getElementById('login-pass').value;
-                // 🚨 Password ပြင်ချင်ရင် ဒီမှာပြင်ပါ
+                
+                // 🚨 Password ပြင်ချင်ရင် ဒီနေရာမှာ ပြင်ပါ (1234)
                 if ((u === 'admin' || u === 'guest') && p === '1234') {
                     this.setSession({ role: u === 'admin' ? 'admin' : 'viewer' });
                 } else alert('Invalid Login!');
@@ -287,9 +288,8 @@
             }
         };
 
-        // --- DB (SUPABASE DATA ဆွဲခြင်း/သိမ်းခြင်း) ---
+        // --- DB (SUPABASE OPERATIONS) ---
         const db = {
-            // Data အကုန်ယူမည်
             async getAll() {
                 // Key မထည့်ရသေးရင် Alert ပြမယ်
                 if(SUPABASE_URL.includes('YOUR_')) {
@@ -300,19 +300,16 @@
                 if (error) { console.error("DB Error:", error); return []; }
                 return data;
             },
-            // အသစ်ထည့်မည်
             async add(emp) {
                 const { data, error } = await supabase.from('employees').insert([emp]).select();
                 if (error) { console.error("Add Error:", error); alert("Error saving to cloud!"); return false; }
                 return true;
             },
-            // ပြင်ဆင်မည်
             async update(id, emp) {
                 const { error } = await supabase.from('employees').update(emp).eq('id', id);
                 if (error) { console.error("Update Error:", error); return false; }
                 return true;
             },
-            // ဖျက်မည်
             async delete(id) {
                 const { error } = await supabase.from('employees').delete().eq('id', id);
                 if (error) { console.error("Delete Error:", error); return false; }
@@ -320,7 +317,7 @@
             }
         };
 
-        // --- CHART CONTROLS (Org Chart အကြီးအသေးချုံ့/ချဲ့) ---
+        // --- CHART CONTROLS ---
         const chart = {
             scale: 1,
             zoom(delta) {
@@ -330,15 +327,14 @@
             reset() { this.scale = 1; document.getElementById('org-tree-root').style.transform = `scale(1)`; }
         };
 
-        // --- APP LOGIC (အဓိက လုပ်ဆောင်ချက်များ) ---
+        // --- APP LOGIC ---
         const app = {
             data: [],
             state: { view: 'list', dept: 'All', search: '' },
 
-            // စစချင်း Run တဲ့အခါ အလုပ်လုပ်မည့် Function
             async init() {
                 this.toggleLoading(true);
-                this.data = await db.getAll(); // Cloud မှ Data ယူ
+                this.data = await db.getAll();
                 this.toggleLoading(false);
                 
                 this.renderSidebar();
@@ -351,13 +347,11 @@
                 });
             },
 
-            // Loading ပြ/မပြ
             toggleLoading(show) {
                 document.getElementById('loading-overlay').classList.toggle('hidden', !show);
                 document.getElementById('loading-overlay').classList.toggle('flex', show);
             },
 
-            // List နဲ့ Chart ပြောင်းကြည့်ရန်
             switchView(view) {
                 this.state.view = view;
                 document.getElementById('view-list').classList.toggle('hidden', view !== 'list');
@@ -376,7 +370,6 @@
                 }
             },
 
-            // ဘယ်ဘက် Sidebar မှာ ဌာနနာမည်တွေပြခြင်း
             renderSidebar() {
                 const depts = {};
                 this.data.forEach(e => depts[e.dept] = (depts[e.dept] || 0) + 1);
@@ -403,7 +396,6 @@
                 this.renderChart();
             },
 
-            // ဇယားကွက်ပုံစံပြခြင်း
             renderList() {
                 const grid = document.getElementById('employee-grid');
                 grid.innerHTML = '';
@@ -419,7 +411,6 @@
 
                 filtered.forEach(e => {
                     const isAdmin = auth.currentUser.role === 'admin';
-                    // Rank အလိုက် အရောင်ခွဲခြင်း
                     let rankColor = 'bg-slate-100 text-slate-500 border-slate-200';
                     if ((e.rank || 0) >= 8) rankColor = 'bg-blue-100 text-blue-700 border-blue-200';
                     else if ((e.rank || 0) >= 5) rankColor = 'bg-purple-100 text-purple-700 border-purple-200';
@@ -443,7 +434,6 @@
                 });
             },
 
-            // Org Chart ပုံစံပြခြင်း
             renderChart() {
                 const root = document.getElementById('org-tree-root');
                 root.innerHTML = '';
@@ -464,7 +454,6 @@
                     html += `<li><div class="tree-node company shadow-lg">${comp}</div><ul>`;
                     
                     for (const [deptName, staff] of Object.entries(depts)) {
-                        // [SORT] Chart မှာလည်း Rank ကြီးသူ အရင်ပြ
                         staff.sort((a,b) => (b.rank || 0) - (a.rank || 0));
 
                         html += `<li><div class="tree-node dept shadow">${deptName}</div>`;
@@ -501,7 +490,6 @@
                 root.innerHTML = html;
             },
 
-            // Chart Node တစ်ခုချင်းစီကို တည်ဆောက်ခြင်း
             createNode(emp) {
                 const isAdmin = auth.currentUser.role === 'admin';
                 let rankClass = 'rank-low';
@@ -523,24 +511,22 @@
                     </div>`;
             },
 
-            // အသစ်ထည့်ရန် Modal ဖွင့်ခြင်း
             openAddModal() {
                 document.getElementById('emp-modal').classList.remove('hidden');
                 document.getElementById('modal-title').innerText = "Add New Employee";
                 document.querySelector('#emp-modal form').reset();
-                document.getElementById('inp-id').value = ""; // ID ကအသစ်မို့ လွတ်ထား
+                document.getElementById('inp-id').value = ""; 
                 document.getElementById('inp-real-id').value = "Auto";
                 document.getElementById('inp-rank').value = 1;
             },
 
-            // ပြင်ရန် Modal ဖွင့်ခြင်း
             editEmployee(id) {
                 const emp = this.data.find(e => e.id == id);
                 if(!emp) return;
                 document.getElementById('emp-modal').classList.remove('hidden');
                 document.getElementById('modal-title').innerText = "Edit Employee";
                 
-                document.getElementById('inp-id').value = emp.id; // DB ID
+                document.getElementById('inp-id').value = emp.id; 
                 document.getElementById('inp-real-id').value = emp.id;
                 document.getElementById('inp-company').value = emp.company;
                 document.getElementById('inp-name').value = emp.name;
@@ -551,12 +537,11 @@
                 document.getElementById('inp-jd').value = emp.jd || "";
             },
 
-            // Data သိမ်းဆည်းခြင်း (Save)
             async saveEmployee(e) {
                 e.preventDefault();
                 this.toggleLoading(true);
 
-                const idInput = document.getElementById('inp-id').value; // Hidden ID
+                const idInput = document.getElementById('inp-id').value; 
                 const empObj = {
                     company: document.getElementById('inp-company').value,
                     name: document.getElementById('inp-name').value,
@@ -569,22 +554,19 @@
 
                 let success = false;
                 if (idInput) { 
-                    // Update
                     success = await db.update(parseInt(idInput), empObj);
                 } else {
-                    // Add New
                     success = await db.add(empObj);
                 }
 
                 if (success) {
-                    this.data = await db.getAll(); // Data Refresh
+                    this.data = await db.getAll(); 
                     this.closeModal('emp-modal');
                     this.filterDept(this.state.dept);
                 }
                 this.toggleLoading(false);
             },
 
-            // ဖျက်ရန်
             async deleteEmployee(id) {
                 if(confirm("Delete this employee?")) {
                     this.toggleLoading(true);
@@ -595,7 +577,6 @@
                 }
             },
 
-            // Job Description ကြည့်ရန် (Modal အကြီး)
             viewJD(id) {
                 const emp = this.data.find(e => e.id == id);
                 if(!emp) return;
@@ -620,7 +601,6 @@
             }
         };
 
-        // Browser စဖွင့်တာနဲ့ Auth စစ်မယ်
         window.addEventListener('DOMContentLoaded', () => auth.init());
     </script>
 </body>
